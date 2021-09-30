@@ -1,0 +1,30 @@
+/*body {
+  font-family: Arial, Helvetica, sans-serif;
+}*/
+h1,h2,h3 {
+  font-family: MedievalSharp, Arial, Helvetica, sans-serif;
+}
+
+/* http://www.kryogenix.org/code/browser/sorttable/#symbolsbeforesorting */
+table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after { 
+    content: " \25B4\25BE" 
+}
+/* http://www.kryogenix.org/code/browser/sorttable/#lefthandheader */
+table.sortable tbody {
+    counter-reset: sortabletablescope;
+}
+table.sortable thead tr::before {
+    content: "";
+    display: table-cell;
+}
+table.sortable tbody tr::before {
+    content: counter(sortabletablescope);
+    counter-increment: sortabletablescope;
+    display: table-cell;
+}
+
+/* http://stackoverflow.com/a/25517025/1168342 */
+.vertical-align {
+    display: flex;
+    align-items: center;
+}
