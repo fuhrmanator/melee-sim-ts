@@ -1,8 +1,13 @@
+import { Fred } from "./fred";
+
 const ctx: Worker = self as any;
 
-class SieveOfEratosthenes {
+export class SieveOfEratosthenes {
   
     calculate(limit: number) {
+
+      const fred = new Fred(1);
+      console.log(fred.a);
 
       const sieve = [];
       const primes: number[] = [];
