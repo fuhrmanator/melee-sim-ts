@@ -9,7 +9,7 @@ let primeWorker: PrimeWorker
 function createTableFromProperties(heroWins: { [index: string]: number }, totalCount: number, caption: string, isVersus: boolean) {
     let tbl = document.createElement("table");
     tbl.style.width = "100%";
-    tbl.className = "sortable table table-striped table-condensed"; // bootstrap --> class="table table-striped"
+    tbl.className = "sortable table table-striped table-condensed caption-top"; // bootstrap --> class="table table-striped"
     // tbl.className = "sortable";  // sorttable.js is the hook
     tbl.setAttribute("border", "0");
     /**
