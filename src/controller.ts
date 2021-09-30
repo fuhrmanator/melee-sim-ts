@@ -151,8 +151,6 @@ export function start(this: GlobalEventHandlers, ev: MouseEvent) {
 
     // crunch the numbers in a web worker
     primeWorker = new PrimeWorker();
-    // let worker = new Worker("../worker/simulator.js");
-    // webWorker = primeWorker;
     primeWorker.addEventListener("message", function (event) {
         let data = event.data;
         let hw = document.getElementById("heroWins");

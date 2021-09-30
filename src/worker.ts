@@ -68,13 +68,12 @@ function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {
     // how many bouts total is N * N-1 * boutCount
     let totalIterations = heroSet.length * (heroSet.length - 1) * boutCount / 2;
     let iterationCount = 0;
-    // heroSet.forEach(function (hero1) {
-    //     // heroWins.set(hero1.name, 0);
-    //     // console.log(`Set heroWins to ${heroWins.get(hero1.name)} for ${hero1.name}`)
-    //     heroSet.forEach( hero2 => {
-    //         if (hero1 !== hero2) matchupWins.set(hero1.name + "/" + hero2.name, 0);
-    //     });
-    // });
+    heroSet.forEach(function (hero1) {
+        heroWins[hero1.name] = 0;
+        heroSet.forEach( hero2 => {
+            if (hero1 !== hero2) matchupWins[hero1.name + "/" + hero2.name] = 0;
+        });
+    });
     let lastUpdateTime = new Date(); // for throttling updates
     //console.log(heroWins);
 
@@ -119,38 +118,38 @@ function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {
                     let losingFighter = (winningFighter === fightingHero1 ? fightingHero2 : fightingHero1);
                     console.log(` with score of ${score[(winningFighter === fightingHero1 ? 0 : 1)]++}`);
                     const key = winningFighter.name + "/" + losingFighter.name;
-                    let currentWins = matchupWins[key];
-                    if (currentWins) {
-                        matchupWins.set(key, currentWins+1);
-                        console.log(`Updating matchup wins for ${key} to ${currentWins + 1}`)
-                    } else {
-                        matchupWins.set(key, 1);
-                        console.log(`Initializing matchup wins for ${key} to 1`)
-                    }
+                    matchupWins[key]++;
+                    // if (currentWins) {
+                    //     matchupWins.set(key, currentWins+1);
+                    //     console.log(`Updating matchup wins for ${key} to ${currentWins + 1}`)
+                    // } else {
+                    //     matchupWins.set(key, 1);
+                    //     console.log(`Initializing matchup wins for ${key} to 1`)
+                    // }
                 }
                 sumRounds += game.round;
             }
             /**
              * Update the total stats for these heroes
              */
-            let currScore = heroWins.get(hero1.name);
-            if (currScore) {
-                heroWins.set(hero1.name, currScore + score[0]);
-                console.log(`Updating heroWins for hero: ${hero1.name}:${heroWins.get(hero1.name)}`);
-            } else {
-                heroWins.set(hero1.name, score[0]);
-                console.log(`Initializing heroWins for hero: ${hero1.name}:${heroWins.get(hero1.name)}`);
-            }
-            currScore = heroWins.get(hero2.name);
-            if (currScore) {
-                heroWins.set(hero2.name, currScore + score[1]);
-                console.log(`                       and: ${hero2.name}:${heroWins.get(hero2.name)}`);
-            } else {
-                heroWins.set(hero2.name, score[1]);
-                console.log(`Initializing heroWins for hero: ${hero2.name}:${heroWins.get(hero2.name)}`);
-            }
-            // heroWins[hero1.name] += score[0];
-            // heroWins[hero2.name] += score[1];
+            // let currScore = heroWins.get(hero1.name);
+            // if (currScore) {
+            //     heroWins.set(hero1.name, currScore + score[0]);
+            //     console.log(`Updating heroWins for hero: ${hero1.name}:${heroWins.get(hero1.name)}`);
+            // } else {
+            //     heroWins.set(hero1.name, score[0]);
+            //     console.log(`Initializing heroWins for hero: ${hero1.name}:${heroWins.get(hero1.name)}`);
+            // }
+            // currScore = heroWins.get(hero2.name);
+            // if (currScore) {
+            //     heroWins.set(hero2.name, currScore + score[1]);
+            //     console.log(`                       and: ${hero2.name}:${heroWins.get(hero2.name)}`);
+            // } else {
+            //     heroWins.set(hero2.name, score[1]);
+            //     console.log(`Initializing heroWins for hero: ${hero2.name}:${heroWins.get(hero2.name)}`);
+            // }
+            heroWins[hero1.name] += score[0];
+            heroWins[hero2.name] += score[1];
         }
 
     }
