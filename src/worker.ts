@@ -1,50 +1,146 @@
-import { Fred } from "./fred";
+﻿import { Game } from "./game";
+import { Hero } from "./hero";
+import { log, setMute } from "./logger";
 
 const ctx: Worker = self as any;
+//const scope = (self as unknown) as Worker
+// scope.addEventListener('message', event => {
+//   console.log(event.data)
+//   scope.postMessage('pong')
+// })
 
-export class SieveOfEratosthenes {
-  
-    calculate(limit: number) {
 
-      const fred = new Fred(1);
-      console.log(fred.a);
+////////////////
 
-      const sieve = [];
-      const primes: number[] = [];
-      let k;
-      let l;
 
-      sieve[1] = false;
-      for (k = 2; k <= limit; k += 1) {
-        sieve[k] = true;
-      }
+// This file must have worker types, but not DOM types.
+// The global should be that of a dedicated worker.
 
-      for (k = 2; k * k <= limit; k += 1) {
-        if (sieve[k] !== true) {
-          continue;
+// // This fixes `self`'s type.
+// declare let self: DedicatedWorkerGlobalScope;
+//  export {};
+
+// const helloMessage = {
+//   hello: 'world',
+// };
+
+// export type HelloMessage = typeof helloMessage;
+
+// // Both of these should work.
+// postMessage(helloMessage);
+// self.postMessage(helloMessage);
+
+// require(["./HeroesSingleton", "./Hero", "./Game", "./controller", "./Logger"], function (HeroesSingleton, Hero, Game, controller, Logger) {
+//     "use strict";
+
+let poleWeaponsChargeFirstRound = false;
+let defendVsPoleCharge = false;
+
+ctx.postMessage({ "cmd": "worker started" });
+
+ctx.addEventListener('message', function(event: any) {
+    /**
+     * Only one type of message to start this thread
+     */
+    let data = event.data;
+    let heroSet = new Array<Hero>();  // list of heroes to fight
+
+    Game.createHeroesMap();
+    let completeHeroMap = Game.getHeroMap();
+    data.selectedHeroes.forEach(function (heroName: string) {
+        let hero = completeHeroMap.get(heroName);
+        if (hero) heroSet.push(hero);
+    }, this);
+
+    /**
+     * Configure simulator options
+     */
+    setMute(!data.isVerbose);
+    poleWeaponsChargeFirstRound = data.isPoleWeaponsChargeFirstRound;
+    defendVsPoleCharge = data.isDefendVsPoleCharge;
+
+    tryAllCombinations(heroSet, data.boutCount);
+});
+
+function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {
+    let matchupWins = new Map<string, number>();  // map of hero and integer
+    let heroWins = new Map<string, number>();
+    let game = null;
+    let score = [2];
+    let progress = 0;
+    // how many bouts total is N * N-1 * boutCount
+    let totalIterations = heroSet.length * (heroSet.length - 1) * boutCount / 2;
+    let iterationCount = 0;
+    heroSet.forEach(function (hero1) {
+        heroWins.set(hero1.name, 0);
+        heroSet.forEach( hero2 => {
+            if (hero1 !== hero2) matchupWins.set(hero1.name + "/" + hero2.name, 0);
+        });
+    });
+    let lastUpdateTime = new Date(); // for throttling updates
+    //console.log(heroWins);
+
+    for (let h1 = 0; h1 < heroSet.length; h1++) {
+        let hero1 = heroSet[h1];
+        let h2 = 0;
+        let hero2 = heroSet[h2];
+
+        for (h2 = h1 + 1; h2 < heroSet.length; h2++) {
+            hero2 = heroSet[h2];
+            let sumRounds = 0;
+            score[0] = 0;
+            score[1] = 0;
+            log('Matchup: ' + hero1.name + ' vs. ' + hero2.name);
+
+            for (let bout = 0; bout < boutCount; bout++) {
+                log("Bout: " + bout + 1 + " of " + boutCount);
+                iterationCount++;
+                /**
+                 * Don't post updates too often
+                 */
+                let currentTime = new Date();
+                if (currentTime.getTime() - lastUpdateTime.getTime() > 200) {
+                    /**
+                     * update progress bar on page (assumes max is 10000)
+                     */
+                    progress = Math.ceil((iterationCount / totalIterations) * 100 * 100);
+                    ctx.postMessage({ "cmd": "progressUpdate", "progress": progress });
+                    lastUpdateTime = currentTime;
+                }
+
+                // clone heroes (resets them) prior to fighting
+                let fightingHero1 = Object.create(hero1);
+                let fightingHero2 = Object.create(hero2);
+                // console.log(fightingHero1);
+                // console.log(fightingHero2);
+                game = new Game(fightingHero1, fightingHero2, poleWeaponsChargeFirstRound, defendVsPoleCharge);
+                let winningFighter = game.fightToTheDeath();
+
+                if (winningFighter !== null) {
+                    let losingFighter = (winningFighter === fightingHero1 ? fightingHero2 : fightingHero1);
+                    score[(winningFighter === fightingHero1 ? 0 : 1)]++;
+                    const key = winningFighter.name + "/" + losingFighter.name;
+                    let currentWins = matchupWins.get(key);
+                    if (currentWins) matchupWins.set(key, currentWins+1);
+                }
+                sumRounds += game.round;
+            }
+            /**
+             * Update the total stats for these heroes
+             */
+            let currScore = heroWins.get(hero1.name);
+            if (currScore) heroWins.set(hero1.name, currScore + score[0]);
+            currScore = heroWins.get(hero2.name);
+            if (currScore) heroWins.set(hero2.name, currScore + score[1]);
+            // heroWins[hero1.name] += score[0];
+            // heroWins[hero2.name] += score[1];
         }
-        for (l = k * k; l <= limit; l += k) {
-          sieve[l] = false;
-        }
-      }
-
-      sieve.forEach(function (value, key) {
-        if (value) {
-          this.push(key);
-        }
-      }, primes);
-
-      return primes;
 
     }
-
+    /**
+     * Put stats back on page
+     */
+    ctx.postMessage({ "cmd": "finished", "heroWins": heroWins, "matchupWins": matchupWins });
 }
 
-const sieve = new SieveOfEratosthenes();
-
-
-ctx.addEventListener("message", (event) => {
-    const limit = event.data.limit;
-    const primes = sieve.calculate(limit);
-    ctx.postMessage({ primes });
-});
+// });
