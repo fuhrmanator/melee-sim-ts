@@ -1,12 +1,10 @@
 ﻿import PrimeWorker from "worker-loader!./worker";
 
-const worker = new PrimeWorker();
-
 let isPoleWeaponsChargeFirstRoundChecked = false;
 let isDefendVsPoleChargeChecked = false;
 let isVerboseChecked = false;
 
-//let webWorker: Worker;
+let worker: PrimeWorker
 
 function createTableFromProperties(heroWins: {[index: string] : number}, totalCount: number, caption: string, isVersus: boolean) {
     let tbl = document.createElement("table");
@@ -106,15 +104,19 @@ function clearDiv(id: string) {
 }
 
 export function start(this: GlobalEventHandlers, ev: MouseEvent) {
-    //let worker = new Worker("../worker/simulator.js");
 
-    worker.addEventListener('message', event => {
-        console.log(event.data)
-    });
+    console.log (`Start button`);
+    // worker = new PrimeWorker();
 
-    worker.postMessage('ping');
-    worker.postMessage('ping');
-    worker.postMessage('ping');
+    // console.log(`Started worker ${worker}`);
+
+    // worker.addEventListener('message', event => {
+    //     console.log(event.data)
+    // });
+
+    // worker.postMessage('ping');
+    // worker.postMessage('ping');
+    // worker.postMessage('ping');
 
     // isPoleWeaponsChargeFirstRoundChecked = (document.getElementById("poleWeaponsChargeFirstRound") as HTMLInputElement).checked;
     // isDefendVsPoleChargeChecked = (document.getElementById("defendVsPoleCharge") as HTMLInputElement).checked;
