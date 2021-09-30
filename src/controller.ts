@@ -4,9 +4,9 @@ let isPoleWeaponsChargeFirstRoundChecked = false;
 let isDefendVsPoleChargeChecked = false;
 let isVerboseChecked = false;
 
-let worker: PrimeWorker
+let primeWorker: PrimeWorker
 
-function createTableFromProperties(heroWins: {[index: string] : number}, totalCount: number, caption: string, isVersus: boolean) {
+function createTableFromProperties(heroWins: { [index: string]: number }, totalCount: number, caption: string, isVersus: boolean) {
     let tbl = document.createElement("table");
     tbl.style.width = "100%";
     tbl.className = "sortable table table-striped table-condensed"; // bootstrap --> class="table table-striped"
@@ -105,8 +105,7 @@ function clearDiv(id: string) {
 
 export function start(this: GlobalEventHandlers, ev: MouseEvent) {
 
-    console.log (`Start button`);
-    // worker = new PrimeWorker();
+    console.log(`Start button`);
 
     // console.log(`Started worker ${worker}`);
 
@@ -118,117 +117,128 @@ export function start(this: GlobalEventHandlers, ev: MouseEvent) {
     // worker.postMessage('ping');
     // worker.postMessage('ping');
 
-    // isPoleWeaponsChargeFirstRoundChecked = (document.getElementById("poleWeaponsChargeFirstRound") as HTMLInputElement).checked;
-    // isDefendVsPoleChargeChecked = (document.getElementById("defendVsPoleCharge") as HTMLInputElement).checked;
-    // isVerboseChecked = (document.getElementById("verboseOutput") as HTMLInputElement).checked;
+    isPoleWeaponsChargeFirstRoundChecked = (document.getElementById("poleWeaponsChargeFirstRound") as HTMLInputElement).checked;
+    isDefendVsPoleChargeChecked = (document.getElementById("defendVsPoleCharge") as HTMLInputElement).checked;
+    isVerboseChecked = (document.getElementById("verboseOutput") as HTMLInputElement).checked;
 
-    // // 'this' is the button that was clicked (onclick)
-    // let startButton = this as HTMLInputElement;
-    // startButton.disabled = true;
-    // let stopButton = document.getElementById("stopSimulation") as HTMLInputElement;
-    // stopButton.disabled = false;
-    // let progressBar = document.getElementById("progress");
-    // if (progressBar) {
-    //     progressBar.style.width = 0 + "%";
-    //     progressBar.style.transition = "none"; // don't use bootstrap animation of progress bar
-    //     progressBar.classList.add("active"); // turn on animated striped bar
-    // }
-    // let verboseOutputText = document.getElementById("verboseOutputText") as HTMLTextAreaElement;
-    // verboseOutputText.value = "";
+    // 'this' is the button that was clicked (onclick)
+    let startButton = this as HTMLInputElement;
+    startButton.disabled = true;
+    let stopButton = document.getElementById("stopSimulation") as HTMLInputElement;
+    stopButton.disabled = false;
+    let progressBar = document.getElementById("progress");
+    if (progressBar) {
+        progressBar.style.width = 0 + "%";
+        progressBar.style.transition = "none"; // don't use bootstrap animation of progress bar
+        progressBar.classList.add("active"); // turn on animated striped bar
+    }
+    let verboseOutputText = document.getElementById("verboseOutputText") as HTMLTextAreaElement;
+    verboseOutputText.value = "";
 
-    // /**
-    //  * Clear results from previous run
-    //  */
-    // clearDiv("heroWins");
-    // clearDiv("matchupWins");
+    /**
+     * Clear results from previous run
+     */
+    clearDiv("heroWins");
+    clearDiv("matchupWins");
 
-    // console.log('Starting simulation');
-    // let selectElement = document.getElementById("heroesSelected") as HTMLDataListElement;
-    // let selectedHeroes = getSelectedValues(selectElement);
-    // let logBuffer = "";
-    // //console.log(heroSet);
+    console.log('Starting simulation');
+    let selectElement = document.getElementById("heroesSelected") as HTMLDataListElement;
+    let selectedHeroes = getSelectedValues(selectElement);
+    let logBuffer = "";
+    //console.log(heroSet);
 
-    // let boutCount: number = parseInt((document.getElementById("boutsPerMatchup") as HTMLInputElement).value);
+    let boutCount: number = parseInt((document.getElementById("boutsPerMatchup") as HTMLInputElement).value);
 
-    // // crunch the numbers in a web worker
+    // crunch the numbers in a web worker
+    primeWorker = new PrimeWorker();
     // let worker = new Worker("../worker/simulator.js");
-    // webWorker = worker;
-    // worker.addEventListener("message", function (event) {
-    //     let data = event.data;
-    //     let hw = document.getElementById("heroWins");
-    //     let mw = document.getElementById("matchupWins");
-    //     //console.log("Web worker messaged me: " + event.data);
-    //     switch (data.cmd) {
-    //         case 'worker started':
-    //             // give worker the info
-    //             worker.postMessage({ 'selectedHeroes': selectedHeroes, 'boutCount': boutCount, 'isPoleWeaponsChargeFirstRound': isPoleWeaponsChargeFirstRoundChecked, 'isDefendVsPoleCharge': isDefendVsPoleChargeChecked, 'isVerbose': isVerboseChecked });
-    //             let p = document.createElement('p');
-    //             p.className = "bg-info";
-    //             p.appendChild(document.createTextNode("Calculating results - please wait."));
-    //             if (mw) mw.appendChild(p);
-    //             p = document.createElement('p');
-    //             p.className = "bg-info";
-    //             p.appendChild(document.createTextNode("Calculating results - please wait."));
-    //             if (hw) hw.appendChild(p);
-    //             break;
+    // webWorker = primeWorker;
+    primeWorker.addEventListener("message", function (event) {
+        let data = event.data;
+        let hw = document.getElementById("heroWins");
+        let mw = document.getElementById("matchupWins");
+        if (!hw || !mw) {
+            console.log("couldn't find heroWins or matchupWins element on page!")
+        }
+        else
+            //console.log("Web worker messaged me: " + event.data);
+            switch (data.cmd) {
+                case 'worker started':
+                    // give worker the info
+                    primeWorker.postMessage({ 'selectedHeroes': selectedHeroes, 'boutCount': boutCount, 'isPoleWeaponsChargeFirstRound': isPoleWeaponsChargeFirstRoundChecked, 'isDefendVsPoleCharge': isDefendVsPoleChargeChecked, 'isVerbose': isVerboseChecked });
+                    let p = document.createElement('p');
+                    p.className = "bg-info";
+                    p.appendChild(document.createTextNode("Calculating results - please wait."));
+                    mw.appendChild(p);
+                    p = document.createElement('p');
+                    p.className = "bg-info";
+                    p.appendChild(document.createTextNode("Calculating results - please wait."));
+                    hw.appendChild(p);
+                    break;
 
-    //         case 'log':
-    //             logBuffer += data.message + "\n";
-    //             break;
+                case 'log':
+                    logBuffer += data.message + "\n";
+                    break;
 
-    //         case 'progressUpdate':
-    //             //progressBar.value = data.progress;
-    //             if (progressBar) progressBar.style.width = (data.progress / 100) + "%";
-    //             //progressBar.setAttribute("aria-valuenow", data.progress);
-    //             break;
+                case 'progressUpdate':
+                    //progressBar.value = data.progress;
+                    if (progressBar) progressBar.style.width = (data.progress / 100) + "%";
+                    //progressBar.setAttribute("aria-valuenow", data.progress);
+                    break;
 
-    //         case 'finished':
-    //             if (progressBar) {
-    //                 progressBar.style.width = "100%";
-    //                 progressBar.classList.remove("active"); // stop animated striped bar
-    //             }
+                case 'finished':
+                    if (progressBar) {
+                        progressBar.style.width = "100%";
+                        progressBar.classList.remove("active"); // stop animated striped bar
+                    }
 
-    //             /**
-    //              * Clear messages
-    //              */
-    //             clearDiv("heroWins");
-    //             clearDiv("matchupWins");
-    //             let heroWinsTable = createTableFromProperties(data.heroWins, (selectedHeroes.length - 1) * boutCount, "Results for " + selectedHeroes.length + " heroes, paired up for " + boutCount + " bouts each", false);
-    //             if (hw) hw.appendChild(heroWinsTable);
-    //             //makeSortable(heroWinsTable);
+                    console.log(`Finished: received ${data.heroWins}`);
+                    /**
+                     * Clear messages
+                     */
+                    clearDiv("heroWins");
+                    clearDiv("matchupWins");
+                    let heroWinsTable = createTableFromProperties(data.heroWins, (selectedHeroes.length - 1) * boutCount,
+                        "Results for " + selectedHeroes.length + " heroes, paired up for " + boutCount + " bouts each", false);
+                    hw.appendChild(heroWinsTable);
+                    sorttable.makeSortable(heroWinsTable);
 
-    //             let matchupWinsTable = createTableFromProperties(data.matchupWins, boutCount, "Pairwise results for " + selectedHeroes.length + " heroes, paired up for " + boutCount + " bouts each:", true);
-    //             if (mw) mw.appendChild(matchupWinsTable);
-    //             //makeSortable(matchupWinsTable);
+                    let matchupWinsTable = createTableFromProperties(data.matchupWins, boutCount, "Pairwise results for " + selectedHeroes.length + " heroes, paired up for " + boutCount + " bouts each:", true);
+                    mw.appendChild(matchupWinsTable);
+                    sorttable.makeSortable(matchupWinsTable);
 
-    //             /**
-    //              * Force tables to be sorted
-    //              */
-    //             let myTH = document.getElementById("matchwins");
-    //             //innerSortFunction.apply(myTH, [] as unknown as [e:null]); // once for ascending
-    //             //innerSortFunction.apply(myTH, [] as unknown as [e:null]); // again for descending (stupid but it's how it works)
-    //             myTH = document.getElementById("wins"); // top table last, since the icon only shows on last table sorted...
-    //             //innerSortFunction.apply(myTH, [] as unknown as [e:null]);
-    //             //innerSortFunction.apply(myTH, [] as unknown as [e:null]);
+                    /**
+                     * Force tables to be sorted
+                     */
+                    let myTH = document.getElementById("matchwins") as HTMLTableCellElement;
+                    if (myTH) {
+                        sorttable.innerSortFunction.apply(myTH, [myTH]); // once for ascending
+                        sorttable.innerSortFunction.apply(myTH, [myTH]); // again for descending (stupid but it's how it works)
+                    }
+                    myTH = document.getElementById("wins") as HTMLTableCellElement; // top table last, since the icon only shows on last table sorted...
+                    if (myTH) {
+                        sorttable.innerSortFunction.apply(myTH, [myTH]); // once for ascending
+                        sorttable.innerSortFunction.apply(myTH, [myTH]); // again for descending (stupid but it's how it works)
+                    }
 
-    //             verboseOutputText.value = logBuffer;
+                    verboseOutputText.value = logBuffer;
 
-    //             startButton.disabled = false;
-    //             stopButton.disabled = true;
-    //             break;
+                    startButton.disabled = false;
+                    stopButton.disabled = true;
+                    break;
 
-    //         default:
-    //             console.log("Unrecognized message from web worker: ");
-    //             console.log(data);
-    //             break;
-    //     }
-    // });
+                default:
+                    console.log("Unrecognized message from web worker: ");
+                    console.log(data);
+                    break;
+            }
+    });
 
-    // worker.addEventListener("error", function () {
-    //     console.log("WORKER ERROR", arguments);
-    // });
+    primeWorker.addEventListener("error", function () {
+        console.log("WORKER ERROR", arguments);
+    });
 
-    // // worker takes over leaving the GUI thread free to update
+    // worker takes over leaving the GUI thread free to update
 }
 
 export function stop(this: GlobalEventHandlers, ev: MouseEvent) {
@@ -237,7 +247,7 @@ export function stop(this: GlobalEventHandlers, ev: MouseEvent) {
      */
     let stopButton = this as HTMLInputElement;
     stopButton.disabled = true;
-    worker.terminate();
+    primeWorker.terminate();
 
     let progressBar = document.getElementById("progress");
     if (progressBar) progressBar.classList.remove("active"); // stop animated striped bar

@@ -15,17 +15,17 @@ for (var i = 0; i < heroesListJSON.length; i++) {
     if (select) select.appendChild(opt);
 }
 
-const theTable = document.getElementById("withsymbolsbeforesorting") as HTMLTableElement;
-if (theTable) {
-    console.log("Found withsymbolsbeforesorting");
-    sorttable.makeSortable(theTable);
-}
+// const theTable = document.getElementById("withsymbolsbeforesorting") as HTMLTableElement;
+// if (theTable) {
+//     console.log("Found withsymbolsbeforesorting");
+//     sorttable.makeSortable(theTable);
+// }
 
-const myTH = document.getElementById("series-column") as HTMLTableCellElement;
-if (myTH) {
-    console.log("Found column: " + myTH.textContent);
-    sorttable.innerSortFunction.apply(myTH, [myTH]);
-}
+// const myTH = document.getElementById("series-column") as HTMLTableCellElement;
+// if (myTH) {
+//     console.log("Found column: " + myTH.textContent);
+//     sorttable.innerSortFunction.apply(myTH, [myTH]);
+// }
 
 /**
  * Set up controller options
