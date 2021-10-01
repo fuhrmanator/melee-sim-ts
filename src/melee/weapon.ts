@@ -1,5 +1,5 @@
 ﻿import { rollDice } from "./die";
-import { log } from "./logger";
+import { log } from "../logger";
 
 export class Weapon {
     name: string;

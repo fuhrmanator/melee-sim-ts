@@ -1,4 +1,4 @@
-﻿import { log } from "./logger";
+﻿import { log } from "../logger";
 
 export function roll() {
     const roll = Math.floor(Math.random() * 6 + 1);

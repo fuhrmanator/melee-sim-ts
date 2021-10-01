@@ -1,6 +1,6 @@
 ﻿import { Hero } from "./hero";
 import { Weapon } from "./weapon";
-import { log } from "./logger";
+import { log } from "../logger";
 import { rollDice } from "./die";
 import { HeroesSingleton } from "./heroesSingleton"
 

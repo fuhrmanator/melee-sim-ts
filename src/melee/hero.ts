@@ -1,7 +1,7 @@
 ﻿import { Weapon } from "./weapon";
 import { Shield } from "./shield";
 import { Armor } from "./armor";
-import { log } from "./logger";
+import { log } from "../logger";
 
 export class Hero {
 

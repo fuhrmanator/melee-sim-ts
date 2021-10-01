@@ -1,5 +1,5 @@
 ﻿import { start, stop } from './controller';
-import { HeroesSingleton } from './heroesSingleton';
+import { HeroesSingleton } from './melee/heroesSingleton';
 
 /**
  * Initialize list of heroes to be selected

@@ -1,4 +1,4 @@
-﻿import PrimeWorker from "worker-loader!./worker";
+﻿import PrimeWorker from "worker-loader!./worker/worker";
 
 let isPoleWeaponsChargeFirstRoundChecked = false;
 let isDefendVsPoleChargeChecked = false;

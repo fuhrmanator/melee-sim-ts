@@ -1,6 +1,6 @@
-﻿import { Game } from "./game";
-import { Hero } from "./hero";
-import { log, setMute } from "./logger";
+﻿import { Game } from "../melee/game";
+import { Hero } from "../melee/hero";
+import { log, setMute } from "../logger";
 
 const ctx: Worker = self as any;
 
