@@ -105,7 +105,7 @@ function clearDiv(id: string) {
 
 export function start(this: GlobalEventHandlers, ev: MouseEvent) {
 
-    console.log(`Start button`);
+    //console.log(`Start button`);
 
     // console.log(`Started worker ${worker}`);
 
@@ -130,7 +130,8 @@ export function start(this: GlobalEventHandlers, ev: MouseEvent) {
     if (progressBar) {
         progressBar.style.width = 0 + "%";
         progressBar.style.transition = "none"; // don't use bootstrap animation of progress bar
-        progressBar.classList.add("active"); // turn on animated striped bar
+        //progressBar.classList.add("active"); // turn on animated striped bar
+        progressBar.classList.add("progress-bar-animated"); // turn on animated striped bar
     }
     let verboseOutputText = document.getElementById("verboseOutputText") as HTMLTextAreaElement;
     verboseOutputText.value = "";
@@ -141,7 +142,7 @@ export function start(this: GlobalEventHandlers, ev: MouseEvent) {
     clearDiv("heroWins");
     clearDiv("matchupWins");
 
-    console.log('Starting simulation');
+    //console.log('Starting simulation');
     let selectElement = document.getElementById("heroesSelected") as HTMLDataListElement;
     let selectedHeroes = getSelectedValues(selectElement);
     let logBuffer = "";
@@ -155,8 +156,8 @@ export function start(this: GlobalEventHandlers, ev: MouseEvent) {
         let data = event.data;
         let hw = document.getElementById("heroWins");
         let mw = document.getElementById("matchupWins");
-        if (!hw || !mw) {
-            console.log("couldn't find heroWins or matchupWins element on page!")
+        if (!hw || !mw || !progressBar) {
+            console.log("couldn't find heroWins or matchupWins or progress bar element on page!")
         }
         else
             //console.log("Web worker messaged me: " + event.data);
@@ -180,17 +181,19 @@ export function start(this: GlobalEventHandlers, ev: MouseEvent) {
 
                 case 'progressUpdate':
                     //progressBar.value = data.progress;
-                    if (progressBar) progressBar.style.width = (data.progress / 100) + "%";
+                    const label = Math.round(data.progress / 100) + "%";
+                    progressBar.style.width = label;
+                    progressBar.innerText = label;
                     //progressBar.setAttribute("aria-valuenow", data.progress);
                     break;
 
                 case 'finished':
-                    if (progressBar) {
-                        progressBar.style.width = "100%";
-                        progressBar.classList.remove("active"); // stop animated striped bar
-                    }
+                    progressBar.style.width = "100%";
+                    progressBar.innerText = "100%";
+                    // progressBar.classList.remove("active"); // stop animated striped bar
+                    progressBar.classList.remove("progress-bar-animated"); // stop animated striped bar
 
-                    console.log(`Finished: received ${data.heroWins}`);
+                    //console.log(`Finished: received ${data.heroWins}`);
                     /**
                      * Clear messages
                      */
@@ -223,6 +226,7 @@ export function start(this: GlobalEventHandlers, ev: MouseEvent) {
 
                     startButton.disabled = false;
                     stopButton.disabled = true;
+                    //progressBar.style.width = "0%";
                     break;
 
                 default:
@@ -248,7 +252,7 @@ export function stop(this: GlobalEventHandlers, ev: MouseEvent) {
     primeWorker.terminate();
 
     let progressBar = document.getElementById("progress");
-    if (progressBar) progressBar.classList.remove("active"); // stop animated striped bar
+    if (progressBar) progressBar.classList.remove("progress-bar-animated"); // stop animated striped bar
 
     let mw = document.getElementById("matchupWins");
     let hw = document.getElementById("heroWins");

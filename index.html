@@ -10,10 +10,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Latest compiled JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="./sorttable_unicode2.js"></script>
+    <script src="./sorttable.js"></script>
     <link rel="stylesheet" type="text/css" href="dist/melee.css" />
 
-    <!-- <link rel="apple-touch-icon" sizes="57x57" href="apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="57x57" href="apple-touch-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="apple-touch-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="apple-touch-icon-72x72.png">
     <link rel="apple-touch-icon" sizes="76x76" href="apple-touch-icon-76x76.png">
@@ -30,17 +30,17 @@
     <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="msapplication-TileImage" content="/mstile-144x144.png">
-    <meta name="theme-color" content="#ffffff"> -->
+    <meta name="theme-color" content="#ffffff">
 
 </head>
 
 <body>
 
     <div class="container">
-        <h1>Melee simulator</h1>
+        <h1 class="display-4">Melee simulator</h1>
         <div class="row vertical-align">
             <div class="col col-xs-10 col-md-6 col-lg-6">
-                <p><a href="mailto:fuhrmanator@gmail.com">fuhrmanator@gmail.com</a>. Find the <a
+                <p class="lead"><a href="mailto:fuhrmanator@gmail.com">fuhrmanator@gmail.com</a>. Find the <a
                         href="https://github.com/fuhrmanator/melee-sim-js">source code on Github</a>.</p>
             </div>
             <div class="col col-xs-2 col-md-2 col-lg-2">
@@ -87,19 +87,19 @@
             <div class="">
                 <label for="progress">Progress: </label>
                 <div class="progress">
-                    <div id="progress" role="progressbar" class="progress-bar progress-bar-success progress-bar-striped"
+                    <div id="progress" role="progressbar" class="progress-bar progress-bar-success progress-bar-striped progress-bar-animated"
                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="1000"></div>
                 </div>
                 <!--                <progress class="form-control progress-bar-striped" id="progress" value="0" max="100"></progress>-->
             </div>
         </div>
 
-        <h2>Total wins</h2>
+        <h2 class="display-4">Total wins</h2>
         <!--    <div>This is a sortable table - click column headings to sort.</div>-->
         <div id="heroWins" class="table-responsive">
             <p>(No data generated yet. Select heroes and click Start.)</p>
         </div>
-        <h2>Matched up wins</h2>
+        <h2 class="display-4">Matched up wins</h2>
         <!--    <div>This is a sortable table - click column headings to sort.</div>-->
         <div id="matchupWins" class="table-responsive">
             <p>(No data generated yet. Select heroes and click Start.)</p>

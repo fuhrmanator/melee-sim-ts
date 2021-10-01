@@ -3,39 +3,13 @@ import { Hero } from "./hero";
 import { log, setMute } from "./logger";
 
 const ctx: Worker = self as any;
-//const scope = (self as unknown) as Worker
-// ctx.addEventListener('message', event => {
-//   console.log(`Worker received: ${event.data}`)
-//   ctx.postMessage('pong')
-// })
-
-
-////////////////
-
-
-// This file must have worker types, but not DOM types.
-// The global should be that of a dedicated worker.
-
-// // This fixes `self`'s type.
-// declare let self: DedicatedWorkerGlobalScope;
-//  export {};
-
-// const helloMessage = {
-//   hello: 'world',
-// };
-
-// export type HelloMessage = typeof helloMessage;
-
-// // Both of these should work.
-// postMessage(helloMessage);
-// self.postMessage(helloMessage);
 
 let poleWeaponsChargeFirstRound = false;
 let defendVsPoleCharge = false;
 
 ctx.postMessage({ "cmd": "worker started" });
 
-ctx.addEventListener('message', function(event: any) {
+ctx.addEventListener('message', function (event: any) {
     /**
      * Only one type of message to start this thread
      */
@@ -60,8 +34,8 @@ ctx.addEventListener('message', function(event: any) {
 });
 
 function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {
-    let matchupWins: {[index: string]: number} = {};  // map of hero and integer
-    let heroWins: {[index: string]: number} = {};
+    let matchupWins: { [index: string]: number } = {};  // map of hero and integer
+    let heroWins: { [index: string]: number } = {};
     let game = null;
     let score = [2];
     let progress = 0;
@@ -70,12 +44,11 @@ function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {
     let iterationCount = 0;
     heroSet.forEach(function (hero1) {
         heroWins[hero1.name] = 0;
-        heroSet.forEach( hero2 => {
+        heroSet.forEach(hero2 => {
             if (hero1 !== hero2) matchupWins[hero1.name + "/" + hero2.name] = 0;
         });
     });
     let lastUpdateTime = new Date(); // for throttling updates
-    //console.log(heroWins);
 
     for (let h1 = 0; h1 < heroSet.length; h1++) {
         let hero1 = heroSet[h1];
@@ -96,7 +69,7 @@ function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {
                  * Don't post updates too often
                  */
                 let currentTime = new Date();
-                if (currentTime.getTime() - lastUpdateTime.getTime() > 200) {
+                if (currentTime.getTime() - lastUpdateTime.getTime() > 500) {
                     /**
                      * update progress bar on page (assumes max is 10000)
                      */
@@ -108,46 +81,24 @@ function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {
                 // clone heroes (resets them) prior to fighting
                 let fightingHero1 = Object.create(hero1);
                 let fightingHero2 = Object.create(hero2);
-                // console.log(fightingHero1);
-                // console.log(fightingHero2);
                 game = new Game(fightingHero1, fightingHero2, poleWeaponsChargeFirstRound, defendVsPoleCharge);
                 let winningFighter = game.fightToTheDeath();
 
                 if (winningFighter !== null) {
-                    console.log(`Winning fighter is: ${winningFighter.name}`)
                     let losingFighter = (winningFighter === fightingHero1 ? fightingHero2 : fightingHero1);
-                    console.log(` with score of ${score[(winningFighter === fightingHero1 ? 0 : 1)]++}`);
+                    if (winningFighter === fightingHero1) {
+                        score[0]++;
+                    } else {
+                        score[1]++;
+                    }
                     const key = winningFighter.name + "/" + losingFighter.name;
                     matchupWins[key]++;
-                    // if (currentWins) {
-                    //     matchupWins.set(key, currentWins+1);
-                    //     console.log(`Updating matchup wins for ${key} to ${currentWins + 1}`)
-                    // } else {
-                    //     matchupWins.set(key, 1);
-                    //     console.log(`Initializing matchup wins for ${key} to 1`)
-                    // }
                 }
                 sumRounds += game.round;
             }
             /**
              * Update the total stats for these heroes
              */
-            // let currScore = heroWins.get(hero1.name);
-            // if (currScore) {
-            //     heroWins.set(hero1.name, currScore + score[0]);
-            //     console.log(`Updating heroWins for hero: ${hero1.name}:${heroWins.get(hero1.name)}`);
-            // } else {
-            //     heroWins.set(hero1.name, score[0]);
-            //     console.log(`Initializing heroWins for hero: ${hero1.name}:${heroWins.get(hero1.name)}`);
-            // }
-            // currScore = heroWins.get(hero2.name);
-            // if (currScore) {
-            //     heroWins.set(hero2.name, currScore + score[1]);
-            //     console.log(`                       and: ${hero2.name}:${heroWins.get(hero2.name)}`);
-            // } else {
-            //     heroWins.set(hero2.name, score[1]);
-            //     console.log(`Initializing heroWins for hero: ${hero2.name}:${heroWins.get(hero2.name)}`);
-            // }
             heroWins[hero1.name] += score[0];
             heroWins[hero2.name] += score[1];
         }

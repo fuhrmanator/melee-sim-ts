@@ -15,18 +15,6 @@ for (var i = 0; i < heroesListJSON.length; i++) {
     if (select) select.appendChild(opt);
 }
 
-// const theTable = document.getElementById("withsymbolsbeforesorting") as HTMLTableElement;
-// if (theTable) {
-//     console.log("Found withsymbolsbeforesorting");
-//     sorttable.makeSortable(theTable);
-// }
-
-// const myTH = document.getElementById("series-column") as HTMLTableCellElement;
-// if (myTH) {
-//     console.log("Found column: " + myTH.textContent);
-//     sorttable.innerSortFunction.apply(myTH, [myTH]);
-// }
-
 /**
  * Set up controller options
  */
@@ -34,5 +22,3 @@ const startButton = document.getElementById('startSimulation');
 if (startButton) startButton.onclick = start;
 const stopButton = document.getElementById('stopSimulation');
 if (stopButton) stopButton.onclick = stop;
-
-console.log("App hooked the buttons to their functions.");

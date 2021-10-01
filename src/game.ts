@@ -5,7 +5,6 @@ import { rollDice } from "./die";
 import { HeroesSingleton } from "./heroesSingleton"
 
 export class Game {
-    // define(["./HeroesSingleton", "./Hero", "./Weapon", "./Armor", "./Shield", "./Die", "./Logger"], function (HeroesSingleton, Hero, Weapon, Armor, Shield, Die, Logger) {
 
     static heroMap = new Map<string, Hero>(); // singleton
     hero1: Hero;
@@ -28,7 +27,6 @@ export class Game {
         this.criticalHits = 0;
         this.poleCharge = poleCharge;
         this.defendOnPoleCharge = defendOnPoleCharge;
-        // this.heroMap = {};
         log("New Game with pole charge set to " + this.poleCharge + " and defend on pole charge set to " + this.defendOnPoleCharge);
     };
 
@@ -36,8 +34,8 @@ export class Game {
         var winner = null;
         /**
          * As long as both are still conscious and at least one can do damage
-         * Note: even though one hero breaks a weaon, the other could also
-         * break it resulting in a tie. 
+         * Note: even though one hero breaks a weapon, the other could also
+         * break it resulting in a tie.
          * No HTH is considered.
          * No second weapon is considered.
          */
@@ -61,17 +59,14 @@ export class Game {
             /* roll to see who attacks first */
             else if (this.hero1.adjustedDx == this.hero2.adjustedDx) {
 
-                log("Adjusted dexterities are equal, rolling to decide attack order");
+                log(`Adjusted dexterity (${this.hero1.adjustedDx}) is the same for both fighters; rolling to decide attack order`);
                 if (Math.random() < 0.5) {
                     firstAttacker = this.hero2;
                     secondAttacker = this.hero1;
                 }
             }
 
-            log(firstAttacker.name +
-                " (adjDx = " + firstAttacker.adjustedDx +
-                ") attacks before " + secondAttacker.name +
-                " (adjDx = " + secondAttacker.adjustedDx + ")");
+            log(`${firstAttacker.name} (adjDx = ${firstAttacker.adjustedDx}) attacks before ${secondAttacker.name} (adjDx = ${secondAttacker.adjustedDx})`);
 
             this.hero1.setCharging((this.poleCharge) && (this.round == 1) && this.hero1.getReadiedWeapon.isPole);
             this.hero2.setCharging((this.poleCharge) && (this.round == 1) && this.hero2.getReadiedWeapon.isPole);
@@ -96,7 +91,7 @@ export class Game {
         }
 
         if (winner != null) {
-            log("-------> The winner of this bout is " + winner.name);
+            log(`-------> The winner of this bout is ${winner.name}`);
         }
         else {
             log("-------> This bout was a TIE!");
@@ -114,7 +109,7 @@ export class Game {
             && defender.adjustedDx < 8) {
 
             defender.setDefending();
-            log(defender.name + " is defending this turn because adjDX < 8 and temporarily penalized.");
+            log(`${defender.name} is defending this turn because adjDX < 8 and temporarily penalized.`);
         }
         else if (defendOnPoleCharge
             && !defender.isKnockedDown
@@ -126,7 +121,7 @@ export class Game {
         ) {
 
             defender.setDefending();
-            log(defender.name + " is defending this turn because attacker is charging with pole weapon.");
+            log(`${defender.name} is defending this turn because attacker is charging with pole weapon.`);
         }
     }
 
@@ -134,14 +129,14 @@ export class Game {
         if (hero.isKnockedDown) {
             hero.standUp();
 
-            log(hero.name + " is standing up this turn.");
+            log(`${hero.name} is standing up this turn.`);
         }
     }
 
     private tryPickUp(hero: Hero) {
         if (hero.getDroppedWeapon() !== Weapon.NONE) {
             hero.pickUpWeapon();
-            log(hero.name + " is picking up his weapon this turn (facing rear in all six directions).");
+            log(`${hero.name} is picking up his weapon this turn (rear facing in all six directions).`);
         }
     }
 
@@ -158,7 +153,7 @@ export class Game {
          * (below or equal to the attacker's adjDex OR and automatic hit)
          */
         if (!this.isAutomaticMiss(roll, numDice) && (roll <= attacker.adjustedDx + facingBonus || this.isAutomaticHit(roll, numDice))) {
-            log("Hit! ");
+            log("HIT!!!!");
 
             var hits = attacker.getReadiedWeapon.doDamage();
             if (attacker.isCharging && attacker.getReadiedWeapon.isPole) {
@@ -242,7 +237,6 @@ export class Game {
 
             default:
                 throw new RangeError("unsupported value for roll: " + roll);
-                break;
         }
         return result;
     }
@@ -261,7 +255,6 @@ export class Game {
 
             default:
                 throw new RangeError("unsupported value for roll: " + roll);
-                break;
         }
         return result;
     }
@@ -280,7 +273,6 @@ export class Game {
 
             default:
                 throw new RangeError("unsupported value for roll: " + roll);
-                break;
         }
         return result;
     }
@@ -299,7 +291,6 @@ export class Game {
 
             default:
                 throw new RangeError("unsupported value for roll: " + roll);
-                break;
         }
         return result;
     }
@@ -317,7 +308,6 @@ export class Game {
 
             default:
                 throw new RangeError("unsupported value for roll: " + roll);
-                break;
         }
         return result;
     }
@@ -335,7 +325,6 @@ export class Game {
 
             default:
                 throw new RangeError("unsupported value for roll: " + roll);
-                break;
         }
         return result;
     };
@@ -352,16 +341,6 @@ export class Game {
             this.heroMap.set(h1.name, h1);
         }
     };
-
-    // static putHero(hero) {
-        // add to hashmap
-        //            console.log("Hero name (index to map): '" + heroName + "'" + " len = " + heroName.length);
-        // Game.heroMap[hero.name] = hero;
-        //console.log(hero.toString());
-        // http://stackoverflow.com/a/7196296/1168342
-        // this.heroList.push({key:heroName, value:hero});
-        //console.log("Hero list = " + Object.keys(this.heroList));
-    // };
 
     private displayHeroesMap() {
         console.log(Object.keys(Game.heroMap));
