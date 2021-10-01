@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "cp browser/* dist && lite-server",
+    "deploy": "cp browser/* dist && lite-server --baseDir=\"dist\"",
     "build": "webpack"
   },
   "author": "",
