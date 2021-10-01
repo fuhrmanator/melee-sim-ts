@@ -4,13 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --colors",
     "deploy": "cp browser/* dist && lite-server --baseDir=\"dist\"",
     "build": "webpack"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/preset-env": "^7.15.6",
+    "@babel/preset-typescript": "^7.15.0",
+    "@types/jest": "^27.0.2",
+    "jest": "^27.2.4",
+    "jest-extended": "^0.11.5",
     "lite-server": "^2.6.1",
     "ts-loader": "^9.2.6",
     "typescript": "^4.4.3",
