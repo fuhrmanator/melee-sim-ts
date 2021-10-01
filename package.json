@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --colors",
-    "deploy": "cp browser/* dist && lite-server --baseDir=\"dist\"",
+    "deploy": "cp browser/* www && lite-server --baseDir=\"www\"",
     "build": "webpack"
   },
   "author": "",
