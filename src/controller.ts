@@ -95,15 +95,19 @@ export function start(this: GlobalEventHandlers, _ev: MouseEvent) {
 
                     case 'progressUpdate':
                         //progressBar.value = data.progress;
-                        const label = Math.round(data.progress / 100) + "%";
+                        const progress = Math.round(data.progress / 100);
+                        const label = progress + "%";
                         progressBar.style.width = label;
-                        progressBar.innerText = label;
-                        //progressBar.setAttribute("aria-valuenow", data.progress);
+                        if (progress < 100) {
+                            progressBar.innerText = label;
+                        } else {
+                            progressBar.innerText = "Simulation completed. Creating results...";
+                        }
                         break;
 
                     case 'finished':
                         progressBar.style.width = "100%";
-                        progressBar.innerText = "100%";
+                        progressBar.innerText = "See results below.";
                         // progressBar.classList.remove("active"); // stop animated striped bar
                         progressBar.classList.remove("progress-bar-animated"); // stop animated striped bar
 

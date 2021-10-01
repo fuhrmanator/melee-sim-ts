@@ -116,6 +116,7 @@ function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {
     /**
      * Put stats back on page
      */
+    ctx.postMessage({ "cmd": "progressUpdate", "progress": 100*100 });
     console.log(`Creating tables in worker...`);
     const heroWinsTableHTML = createTableFromProperties(heroWins, (heroSet.length - 1) * boutCount,
         `Results for ${heroSet.length} heroes, paired up for ${boutCount} bouts each:`, false);
