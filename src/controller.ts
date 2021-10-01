@@ -4,7 +4,7 @@ let isPoleWeaponsChargeFirstRoundChecked = false;
 let isDefendVsPoleChargeChecked = false;
 let isVerboseChecked = false;
 
-let primeWorker: PrimeWorker
+let primeWorker: PrimeWorker;
 
 function createTableFromProperties(heroWins: { [index: string]: number }, totalCount: number, caption: string, isVersus: boolean) {
     let tbl = document.createElement("table");
@@ -103,19 +103,7 @@ function clearDiv(id: string) {
     }
 }
 
-export function start(this: GlobalEventHandlers, ev: MouseEvent) {
-
-    //console.log(`Start button`);
-
-    // console.log(`Started worker ${worker}`);
-
-    // worker.addEventListener('message', event => {
-    //     console.log(event.data)
-    // });
-
-    // worker.postMessage('ping');
-    // worker.postMessage('ping');
-    // worker.postMessage('ping');
+export function start(this: GlobalEventHandlers, _ev: MouseEvent) {
 
     isPoleWeaponsChargeFirstRoundChecked = (document.getElementById("poleWeaponsChargeFirstRound") as HTMLInputElement).checked;
     isDefendVsPoleChargeChecked = (document.getElementById("defendVsPoleCharge") as HTMLInputElement).checked;
@@ -143,103 +131,107 @@ export function start(this: GlobalEventHandlers, ev: MouseEvent) {
     clearDiv("matchupWins");
 
     //console.log('Starting simulation');
-    let selectElement = document.getElementById("heroesSelected") as HTMLDataListElement;
-    let selectedHeroes = getSelectedValues(selectElement);
+    const hw = document.getElementById("heroWins");
+    const mw = document.getElementById("matchupWins");
     let logBuffer = "";
     //console.log(heroSet);
 
     let boutCount: number = parseInt((document.getElementById("boutsPerMatchup") as HTMLInputElement).value);
 
     // crunch the numbers in a web worker
-    primeWorker = new PrimeWorker();
-    primeWorker.addEventListener("message", function (event) {
-        let data = event.data;
-        let hw = document.getElementById("heroWins");
-        let mw = document.getElementById("matchupWins");
-        if (!hw || !mw || !progressBar) {
-            console.log("couldn't find heroWins or matchupWins or progress bar element on page!")
-        }
-        else
-            //console.log("Web worker messaged me: " + event.data);
-            switch (data.cmd) {
-                case 'worker started':
-                    // give worker the info
-                    primeWorker.postMessage({ 'selectedHeroes': selectedHeroes, 'boutCount': boutCount, 'isPoleWeaponsChargeFirstRound': isPoleWeaponsChargeFirstRoundChecked, 'isDefendVsPoleCharge': isDefendVsPoleChargeChecked, 'isVerbose': isVerboseChecked });
-                    let p = document.createElement('p');
-                    p.className = "bg-info";
-                    p.appendChild(document.createTextNode("Calculating results - please wait."));
-                    mw.appendChild(p);
-                    p = document.createElement('p');
-                    p.className = "bg-info";
-                    p.appendChild(document.createTextNode("Calculating results - please wait."));
-                    hw.appendChild(p);
-                    break;
-
-                case 'log':
-                    logBuffer += data.message + "\n";
-                    break;
-
-                case 'progressUpdate':
-                    //progressBar.value = data.progress;
-                    const label = Math.round(data.progress / 100) + "%";
-                    progressBar.style.width = label;
-                    progressBar.innerText = label;
-                    //progressBar.setAttribute("aria-valuenow", data.progress);
-                    break;
-
-                case 'finished':
-                    progressBar.style.width = "100%";
-                    progressBar.innerText = "100%";
-                    // progressBar.classList.remove("active"); // stop animated striped bar
-                    progressBar.classList.remove("progress-bar-animated"); // stop animated striped bar
-
-                    //console.log(`Finished: received ${data.heroWins}`);
-                    /**
-                     * Clear messages
-                     */
-                    clearDiv("heroWins");
-                    clearDiv("matchupWins");
-                    let heroWinsTable = createTableFromProperties(data.heroWins, (selectedHeroes.length - 1) * boutCount,
-                        "Results for " + selectedHeroes.length + " heroes, paired up for " + boutCount + " bouts each", false);
-                    hw.appendChild(heroWinsTable);
-                    sorttable.makeSortable(heroWinsTable);
-
-                    let matchupWinsTable = createTableFromProperties(data.matchupWins, boutCount, "Pairwise results for " + selectedHeroes.length + " heroes, paired up for " + boutCount + " bouts each:", true);
-                    mw.appendChild(matchupWinsTable);
-                    sorttable.makeSortable(matchupWinsTable);
-
-                    /**
-                     * Force tables to be sorted
-                     */
-                    let myTH = document.getElementById("matchwins") as HTMLTableCellElement;
-                    if (myTH) {
-                        sorttable.innerSortFunction.apply(myTH, [myTH]); // once for ascending
-                        sorttable.innerSortFunction.apply(myTH, [myTH]); // again for descending (stupid but it's how it works)
-                    }
-                    myTH = document.getElementById("wins") as HTMLTableCellElement; // top table last, since the icon only shows on last table sorted...
-                    if (myTH) {
-                        sorttable.innerSortFunction.apply(myTH, [myTH]); // once for ascending
-                        sorttable.innerSortFunction.apply(myTH, [myTH]); // again for descending (stupid but it's how it works)
-                    }
-
-                    verboseOutputText.value = logBuffer;
-
-                    startButton.disabled = false;
-                    stopButton.disabled = true;
-                    //progressBar.style.width = "0%";
-                    break;
-
-                default:
-                    console.log("Unrecognized message from web worker: ");
-                    console.log(data);
-                    break;
+    if (!primeWorker) {
+        primeWorker = new PrimeWorker();
+        primeWorker.addEventListener("message", function (event) {
+            let data = event.data;
+            if (!hw || !mw || !progressBar) {
+                console.log("couldn't find heroWins or matchupWins or progress bar element on page!")
             }
-    });
+            else {
+                const selectElement = document.getElementById("heroesSelected") as HTMLDataListElement;
+                const selectedHeroes = getSelectedValues(selectElement);
+                //console.log("Web worker messaged me: " + event.data);
+                switch (data.cmd) {
+                    case 'worker waiting':
+                        // give worker the info
+                        primeWorker.postMessage({ 'cmd': 'do simulation', 'selectedHeroes': selectedHeroes, 'boutCount': boutCount, 'isPoleWeaponsChargeFirstRound': isPoleWeaponsChargeFirstRoundChecked, 'isDefendVsPoleCharge': isDefendVsPoleChargeChecked, 'isVerbose': isVerboseChecked });
+                        let p = document.createElement('p');
+                        p.className = "bg-info";
+                        p.appendChild(document.createTextNode("Calculating results - please wait."));
+                        mw.appendChild(p);
+                        p = document.createElement('p');
+                        p.className = "bg-info";
+                        p.appendChild(document.createTextNode("Calculating results - please wait."));
+                        hw.appendChild(p);
+                        break;
 
-    primeWorker.addEventListener("error", function () {
-        console.log("WORKER ERROR", arguments);
-    });
+                    case 'log':
+                        logBuffer += data.message + "\n";
+                        break;
 
+                    case 'progressUpdate':
+                        //progressBar.value = data.progress;
+                        const label = Math.round(data.progress / 100) + "%";
+                        progressBar.style.width = label;
+                        progressBar.innerText = label;
+                        //progressBar.setAttribute("aria-valuenow", data.progress);
+                        break;
+
+                    case 'finished':
+                        progressBar.style.width = "100%";
+                        progressBar.innerText = "100%";
+                        // progressBar.classList.remove("active"); // stop animated striped bar
+                        progressBar.classList.remove("progress-bar-animated"); // stop animated striped bar
+
+                        //console.log(`Finished: received ${data.heroWins}`);
+                        /**
+                         * Clear messages
+                         */
+                        clearDiv("heroWins");
+                        clearDiv("matchupWins");
+                        let heroWinsTable = createTableFromProperties(data.heroWins, (selectedHeroes.length - 1) * boutCount,
+                            "Results for " + selectedHeroes.length + " heroes, paired up for " + boutCount + " bouts each", false);
+                        hw.appendChild(heroWinsTable);
+                        sorttable.makeSortable(heroWinsTable);
+
+                        let matchupWinsTable = createTableFromProperties(data.matchupWins, boutCount, "Pairwise results for " + selectedHeroes.length + " heroes, paired up for " + boutCount + " bouts each:", true);
+                        mw.appendChild(matchupWinsTable);
+                        sorttable.makeSortable(matchupWinsTable);
+
+                        /**
+                         * Force tables to be sorted
+                         */
+                        let myTH = document.getElementById("matchwins") as HTMLTableCellElement;
+                        if (myTH) {
+                            sorttable.innerSortFunction.apply(myTH, [myTH]); // once for ascending
+                            sorttable.innerSortFunction.apply(myTH, [myTH]); // again for descending (stupid but it's how it works)
+                        }
+                        myTH = document.getElementById("wins") as HTMLTableCellElement; // top table last, since the icon only shows on last table sorted...
+                        if (myTH) {
+                            sorttable.innerSortFunction.apply(myTH, [myTH]); // once for ascending
+                            sorttable.innerSortFunction.apply(myTH, [myTH]); // again for descending (stupid but it's how it works)
+                        }
+
+                        verboseOutputText.value = logBuffer;
+
+                        startButton.disabled = false;
+                        stopButton.disabled = true;
+                        //progressBar.style.width = "0%";
+                        break;
+
+                    default:
+                        console.log("Unrecognized message from web worker: ");
+                        console.log(data);
+                        break;
+                }
+
+            }
+        });
+        primeWorker.addEventListener("error", function () {
+            console.log("WORKER ERROR", arguments);
+        });
+    } else {
+        primeWorker.postMessage({ 'cmd': 'wake up' });
+    }
     // worker takes over leaving the GUI thread free to update
 }
 

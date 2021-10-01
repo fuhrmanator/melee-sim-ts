@@ -7,30 +7,39 @@ const ctx: Worker = self as any;
 let poleWeaponsChargeFirstRound = false;
 let defendVsPoleCharge = false;
 
-ctx.postMessage({ "cmd": "worker started" });
+ctx.postMessage({ "cmd": "worker waiting" });
 
 ctx.addEventListener('message', function (event: any) {
     /**
-     * Only one type of message to start this thread
+     * parse the message
      */
-    let data = event.data;
-    let heroSet = new Array<Hero>();  // list of heroes to fight
+    const data = event.data;
+    console.log(`Worker: got message ${data.cmd}`);
+    switch (data.cmd) {
+        case "wake up":
+            ctx.postMessage({ "cmd": "worker waiting" });
+            break;
 
-    Game.createHeroesMap();
-    let completeHeroMap = Game.getHeroMap();
-    data.selectedHeroes.forEach(function (heroName: string) {
-        let hero = completeHeroMap.get(heroName);
-        if (hero) heroSet.push(hero);
-    }, this);
+        default:
+            const heroSet = new Array<Hero>();  // list of heroes to fight
 
-    /**
-     * Configure simulator options
-     */
-    setMute(!data.isVerbose);
-    poleWeaponsChargeFirstRound = data.isPoleWeaponsChargeFirstRound;
-    defendVsPoleCharge = data.isDefendVsPoleCharge;
+            Game.createHeroesMap();
+            let completeHeroMap = Game.getHeroMap();
+            data.selectedHeroes.forEach(function (heroName: string) {
+                let hero = completeHeroMap.get(heroName);
+                if (hero) heroSet.push(hero);
+            }, this);
 
-    tryAllCombinations(heroSet, data.boutCount);
+            /**
+             * Configure simulator options
+             */
+            setMute(!data.isVerbose);
+            poleWeaponsChargeFirstRound = data.isPoleWeaponsChargeFirstRound;
+            defendVsPoleCharge = data.isDefendVsPoleCharge;
+
+            tryAllCombinations(heroSet, data.boutCount);
+            break;
+    }
 });
 
 function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {

@@ -1,0 +1,17 @@
+@startuml WorkerMessaging
+skinparam Style strictuml
+participant start as ":StartButton"
+participant controller as ":Controller" 
+participant worker as ":Worker" <<(W,#ADD1B2)>>
+
+start -> controller : click
+opt !worker
+    create worker
+    controller --> worker : create
+    worker --> controller : worker started
+else worker
+    controller --> worker : wake up
+    worker --> controller : worker started
+end
+
+@enduml
