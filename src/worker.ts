@@ -116,5 +116,124 @@ function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {
     /**
      * Put stats back on page
      */
-    ctx.postMessage({ "cmd": "finished", "heroWins": heroWins, "matchupWins": matchupWins });
+    console.log(`Creating tables in worker...`);
+    const heroWinsTableHTML = createTableFromProperties(heroWins, (heroSet.length - 1) * boutCount,
+        `Results for ${heroSet.length} heroes, paired up for ${boutCount} bouts each:`, false);
+    const matchupWinsTableHTML: string = createTableFromProperties(matchupWins, boutCount,
+        `Pairwise results for ${heroSet.length} heroes, paired up for ${boutCount} bouts each:`, true);
+    ctx.postMessage({
+        "cmd": "finished",
+        "heroWins": heroWins,
+        "matchupWins": matchupWins,
+        "heroWinsTableHTML": heroWinsTableHTML,
+        "matchupWinsTableHTML": matchupWinsTableHTML
+    });
+}
+
+function createTableFromProperties(heroWins: { [index: string]: number }, totalCount: number, caption: string, isVersus: boolean): string {
+    // tbl.style.width = "100%";
+    // tbl.className = "sortable table table-striped table-condensed caption-top"; // bootstrap --> class="table table-striped"
+    // // tbl.className = "sortable";  // sorttable.js is the hook
+    // tbl.setAttribute("border", "0");
+
+    // <caption>Results for 2 heroes, paired up for 2 bouts each</caption><thead><tr><th class="">Hero</th><th id="wins" class=" sorttable_sorted_reverse" style="text-align: right;">Wins<span id="sorttable_sortrevind">&nbsp;▴</span></th><th class="" style="text-align: right;">% total</th></tr></thead><tbody><tr class="success"><td>006:ST8;DX16;DAGGER;LEATHER;LARGE_SHIELD</td><td style="text-align: right;">2</td><td style="text-align: right;">100</td></tr><tr class="danger"><td>005:ST8;DX16;DAGGER;NO_ARMOR;LARGE_SHIELD</td><td style="text-align: right;">0</td><td style="text-align: right;">0</td></tr></tbody><tfoot></tfoot></table>
+
+    // /**
+    //  * add caption
+    //  */
+    // let tbcaption = document.createElement('caption');
+    // tbcaption.appendChild(document.createTextNode(caption));
+    // tbl.appendChild(tbcaption);
+    // let tbhead = document.createElement('thead');
+    // let tr = document.createElement('tr');
+    // let td = document.createElement('th');
+    let html = `<caption>${caption}</caption><thead>`;
+    // if (isVersus) {
+    //     td.appendChild(document.createTextNode("Hero 1"));
+    //     tr.appendChild(td);
+    //     td = document.createElement('th');
+    //     td.appendChild(document.createTextNode("vs Hero 2"));
+    //     tr.appendChild(td);
+    // } else {
+    //     td = document.createElement('th');
+    //     td.appendChild(document.createTextNode("Hero"));
+    //     tr.appendChild(td);
+    // }
+    if (isVersus) {
+        html += `<tr><th>Hero 1</th><th>vs Hero 2</th>`
+    } else {
+        html += `<tr><th>Hero</th>`
+    }
+    // td = document.createElement('th');
+    // td.id = (isVersus ? "match" : "") + "wins";
+    // td.appendChild(document.createTextNode("Wins"));
+    // // td.setAttribute("align", "right");
+    // td.style.textAlign = "right";
+    // tr.appendChild(td);
+    // td = document.createElement('th');
+    // td.style.textAlign = "right";
+    // td.appendChild(document.createTextNode("% total"));
+    // tr.appendChild(td);
+    // tbhead.appendChild(tr);
+    // tbl.appendChild(tbhead);
+    html += `<th id="${isVersus ? 'match' : ''}wins" style="text-align: right;">Wins</th><th class="" style="text-align: right;">% total</th></tr></thead>`;
+    // let tbdy = document.createElement('tbody');
+    // let percentageWin = 0;
+    // for (let property in heroWins) {
+    //     if (heroWins.hasOwnProperty(property)) {
+    let tbody = '';
+    let percentageWin = 0;
+    let pctClass: string;
+    for (let property in heroWins) {
+        if (heroWins.hasOwnProperty(property)) {
+            percentageWin = parseInt(((heroWins[property] / totalCount) * 100).toFixed(2));
+            pctClass = '';
+            if (percentageWin > 70)
+                pctClass = ` class="alert-success"`;
+            else if (percentageWin < 30)
+                pctClass = ` class="alert-danger"`;
+            tbody += `<tr${pctClass}>`;
+            if (isVersus) {
+                let heroes = property.split("/");
+                tbody += `<td>${heroes[0]}</td><td>${heroes[1]}</td>`;
+            } else {
+                tbody += `<td>${property}</td>`
+            }
+            //         tr = document.createElement('tr');
+            //         td = document.createElement('td');
+            //         if (isVersus) {
+            //             let heroes = property.split("/");
+            //             td.appendChild(document.createTextNode(heroes[0]));
+            //             tr.appendChild(td);
+            //             td = document.createElement('td');
+            //             td.appendChild(document.createTextNode(heroes[1]));
+            //             tr.appendChild(td);
+            //         } else {
+            //             td.appendChild(document.createTextNode(property));
+            //             tr.appendChild(td);
+            //         }
+            //         // add the column for the number of wins
+            //         td = document.createElement('td');
+            //         td.style.textAlign = "right";
+            //         td.appendChild(document.createTextNode(heroWins[property] + ""));
+            //         tr.appendChild(td);
+            tbody += `<td style="text-align: right;">${heroWins[property]}</td>`
+            //         td = document.createElement('td');
+            //         td.style.textAlign = "right";
+            //         percentageWin = parseInt(((heroWins[property] / totalCount) * 100).toFixed(2));
+            //         td.appendChild(document.createTextNode("" + percentageWin));
+            tbody += `<td style="text-align: right;">${percentageWin}</td></tr>`
+            //         if (percentageWin > 70) { tr.className = "success"; }
+            //         else if (percentageWin < 30) { tr.className = "danger"; }
+            //         tr.appendChild(td);
+            //         tbdy.appendChild(tr);
+            //     }
+        }
+    }
+    // }
+    html += `<tbody>${tbody}</tbody>`;
+    // tbl.appendChild(tbdy);
+    // return tbl.innerHTML;
+    // console.log(`Worker generated this HTML:\n${html}`);
+    return html;
 }

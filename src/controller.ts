@@ -6,80 +6,6 @@ let isVerboseChecked = false;
 
 let primeWorker: PrimeWorker;
 
-function createTableFromProperties(heroWins: { [index: string]: number }, totalCount: number, caption: string, isVersus: boolean) {
-    let tbl = document.createElement("table");
-    tbl.style.width = "100%";
-    tbl.className = "sortable table table-striped table-condensed caption-top"; // bootstrap --> class="table table-striped"
-    // tbl.className = "sortable";  // sorttable.js is the hook
-    tbl.setAttribute("border", "0");
-    /**
-     * add caption
-     */
-    let tbcaption = document.createElement('caption');
-    tbcaption.appendChild(document.createTextNode(caption));
-    tbl.appendChild(tbcaption);
-    let tbhead = document.createElement('thead');
-    let tr = document.createElement('tr');
-    let td = document.createElement('th');
-    if (isVersus) {
-        td.appendChild(document.createTextNode("Hero 1"));
-        tr.appendChild(td);
-        td = document.createElement('th');
-        td.appendChild(document.createTextNode("vs Hero 2"));
-        tr.appendChild(td);
-    } else {
-        td = document.createElement('th');
-        td.appendChild(document.createTextNode("Hero"));
-        tr.appendChild(td);
-    }
-    td = document.createElement('th');
-    td.id = (isVersus ? "match" : "") + "wins";
-    td.appendChild(document.createTextNode("Wins"));
-    // td.setAttribute("align", "right");
-    td.style.textAlign = "right";
-    tr.appendChild(td);
-    td = document.createElement('th');
-    td.style.textAlign = "right";
-    td.appendChild(document.createTextNode("% total"));
-    tr.appendChild(td);
-    tbhead.appendChild(tr);
-    tbl.appendChild(tbhead);
-    let tbdy = document.createElement('tbody');
-    let percentageWin = 0;
-    for (let property in heroWins) {
-        if (heroWins.hasOwnProperty(property)) {
-            tr = document.createElement('tr');
-            td = document.createElement('td');
-            if (isVersus) {
-                let heroes = property.split("/");
-                td.appendChild(document.createTextNode(heroes[0]));
-                tr.appendChild(td);
-                td = document.createElement('td');
-                td.appendChild(document.createTextNode(heroes[1]));
-                tr.appendChild(td);
-            } else {
-                td.appendChild(document.createTextNode(property));
-                tr.appendChild(td);
-            }
-            // add the column for the number of wins
-            td = document.createElement('td');
-            td.style.textAlign = "right";
-            td.appendChild(document.createTextNode(heroWins[property] + ""));
-            tr.appendChild(td);
-            td = document.createElement('td');
-            td.style.textAlign = "right";
-            percentageWin = parseInt(((heroWins[property] / totalCount) * 100).toFixed(2));
-            td.appendChild(document.createTextNode("" + percentageWin));
-            if (percentageWin > 70) { tr.className = "success"; }
-            else if (percentageWin < 30) { tr.className = "danger"; }
-            tr.appendChild(td);
-            tbdy.appendChild(tr);
-        }
-    }
-    tbl.appendChild(tbdy);
-    return tbl;
-}
-
 // http://stackoverflow.com/a/5867262/1168342
 function getSelectedValues(selectElement: HTMLDataListElement) {
     let result = [];
@@ -136,8 +62,6 @@ export function start(this: GlobalEventHandlers, _ev: MouseEvent) {
     let logBuffer = "";
     //console.log(heroSet);
 
-    let boutCount: number = parseInt((document.getElementById("boutsPerMatchup") as HTMLInputElement).value);
-
     // crunch the numbers in a web worker
     if (!primeWorker) {
         primeWorker = new PrimeWorker();
@@ -147,6 +71,7 @@ export function start(this: GlobalEventHandlers, _ev: MouseEvent) {
                 console.log("couldn't find heroWins or matchupWins or progress bar element on page!")
             }
             else {
+                const boutCount: number = parseInt((document.getElementById("boutsPerMatchup") as HTMLInputElement).value);
                 const selectElement = document.getElementById("heroesSelected") as HTMLDataListElement;
                 const selectedHeroes = getSelectedValues(selectElement);
                 //console.log("Web worker messaged me: " + event.data);
@@ -188,13 +113,27 @@ export function start(this: GlobalEventHandlers, _ev: MouseEvent) {
                          */
                         clearDiv("heroWins");
                         clearDiv("matchupWins");
-                        let heroWinsTable = createTableFromProperties(data.heroWins, (selectedHeroes.length - 1) * boutCount,
-                            "Results for " + selectedHeroes.length + " heroes, paired up for " + boutCount + " bouts each", false);
+                        // let heroWinsTable = createTableFromProperties(data.heroWins, (selectedHeroes.length - 1) * boutCount,
+                        //     "Results for " + selectedHeroes.length + " heroes, paired up for " + boutCount + " bouts each", false);
+                        //console.log(`got data.heroWinsTableHTML of ${data.heroWinsTableHTML}`)
+                        const heroWinsTable = document.createElement("table");
+                        // tbl.style.width = "100%";
+                        // tbl.className = "sortable table table-striped table-condensed caption-top"; // bootstrap --> class="table table-striped"
+                        // // tbl.className = "sortable";  // sorttable.js is the hook
+                        // tbl.setAttribute("border", "0");
+                        heroWinsTable.style.width = "100%";
+                        heroWinsTable.className = "sortable table table-striped table-condensed caption-top";
                         hw.appendChild(heroWinsTable);
+                        heroWinsTable.innerHTML = data.heroWinsTableHTML;
                         sorttable.makeSortable(heroWinsTable);
 
-                        let matchupWinsTable = createTableFromProperties(data.matchupWins, boutCount, "Pairwise results for " + selectedHeroes.length + " heroes, paired up for " + boutCount + " bouts each:", true);
-                        mw.appendChild(matchupWinsTable);
+                        // let matchupWinsTable = createTableFromProperties(data.matchupWins, boutCount, "Pairwise results for " + selectedHeroes.length + " heroes, paired up for " + boutCount + " bouts each:", true);
+                        //console.log(`got data.matchupWinsTableHTML of ${data.matchupWinsTableHTML}`)
+                        const matchupWinsTable = document.createElement("table");
+                        matchupWinsTable.style.width = "100%";
+                        matchupWinsTable.className = "sortable table table-striped table-condensed caption-top";
+                        matchupWinsTable.innerHTML = data.matchupWinsTableHTML;
+                        mw.appendChild(matchupWinsTable)
                         sorttable.makeSortable(matchupWinsTable);
 
                         /**
@@ -235,7 +174,7 @@ export function start(this: GlobalEventHandlers, _ev: MouseEvent) {
     // worker takes over leaving the GUI thread free to update
 }
 
-export function stop(this: GlobalEventHandlers, ev: MouseEvent) {
+export function stop(this: GlobalEventHandlers, _ev: MouseEvent) {
     /**
      * Stop the web worker
      */
