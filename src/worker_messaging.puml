@@ -4,17 +4,32 @@ participant start as ":StartButton"
 participant stop as ":StopButton"
 participant controller as ":Controller" 
 participant worker as ":Worker" <<(W,#ADD1B2)>>
-autoactivate on
+participant worker2 as ":Worker" <<(W,#ADD1B2)>>
 
-create worker
-controller --> worker : create
+'create worker
+controller --> worker ** : create
 start -> controller : click
-controller -> worker : do simulation
+activate controller
+controller -->> worker : do simulation
 deactivate controller
+activate worker
+deactivate controller
+
+worker -->> controller : update
+activate controller
+deactivate controller
+
+worker -->> controller : update
+activate controller
+deactivate controller
+
 stop -> controller : click
 activate controller
 controller -> worker !! : terminate
-create worker
-controller --> worker : create
+
+create worker2
+controller --> worker2 : create
+
+deactivate controller
 
 @enduml
