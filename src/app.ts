@@ -10,8 +10,8 @@ var heroesListJSON = HeroesSingleton.getHeroesListJSON();
 for (var i = 0; i < heroesListJSON.length; i++) {
     var heroJSON = heroesListJSON[i];
     opt = document.createElement('option');
-    opt.value = heroJSON.name;
-    opt.innerHTML = heroJSON.name;
+    opt.value = heroJSON.id;
+    opt.innerHTML = HeroesSingleton.getNameFromID(heroJSON.id);
     if (select) select.appendChild(opt);
 }
 

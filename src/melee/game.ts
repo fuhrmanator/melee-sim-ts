@@ -336,7 +336,7 @@ export class Game {
         var heroJSON = null;
         for (var i = 0; i < heroesListJSON.length; i++) {
             heroJSON = heroesListJSON[i];
-            h1 = new Hero(heroJSON.name, heroJSON.st, heroJSON.dx, heroJSON.weapon, heroJSON.armor, heroJSON.shield);
+            h1 = new Hero(HeroesSingleton.getNameFromID(heroJSON.id), heroJSON.st, heroJSON.dx, heroJSON.weapon, heroJSON.armor, heroJSON.shield);
             //this.putHero(h1);
             this.heroMap.set(h1.name, h1);
         }

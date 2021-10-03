@@ -3,7 +3,7 @@
       "strict": true,
       "outDir": "./dist/",
       "noImplicitAny": true,
-      "module": "es6",
+      "module": "commonJS",
       "target": "es5",
       "allowJs": true,
       "sourceMap": true,

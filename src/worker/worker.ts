@@ -1,13 +1,12 @@
 ﻿import { Game } from "../melee/game";
 import { Hero } from "../melee/hero";
 import { log, setMute } from "../logger";
+import { HeroesSingleton } from "../melee/heroesSingleton";
 
 const ctx: Worker = self as any;
 
 let poleWeaponsChargeFirstRound = false;
 let defendVsPoleCharge = false;
-
-ctx.postMessage({ "cmd": "worker waiting" });
 
 ctx.addEventListener('message', function (event: any) {
     /**
@@ -25,9 +24,9 @@ ctx.addEventListener('message', function (event: any) {
 
             Game.createHeroesMap();
             let completeHeroMap = Game.getHeroMap();
-            data.selectedHeroes.forEach(function (heroName: string) {
-                let hero = completeHeroMap.get(heroName);
-                if (hero) heroSet.push(hero);
+            data.selectedHeroes.forEach(function (heroID: string) {
+                let hero = completeHeroMap.get(HeroesSingleton.getNameFromID(heroID));
+                if (hero) heroSet.push(hero); else console.log(`  !!! Didn't find ${HeroesSingleton.getNameFromID(heroID)} (${heroID}) in map !!!`);
             }, this);
 
             /**
@@ -117,7 +116,7 @@ function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {
      * Put stats back on page
      */
     ctx.postMessage({ "cmd": "progressUpdate", "progress": 100*100 });
-    console.log(`Creating tables in worker...`);
+    console.log(` in worker...`);
     const heroWinsTableHTML = createTableFromProperties(heroWins, (heroSet.length - 1) * boutCount,
         `Results for ${heroSet.length} heroes, paired up for ${boutCount} bouts each:`, false);
     const matchupWinsTableHTML: string = createTableFromProperties(matchupWins, boutCount,
@@ -132,56 +131,13 @@ function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {
 }
 
 function createTableFromProperties(heroWins: { [index: string]: number }, totalCount: number, caption: string, isVersus: boolean): string {
-    // tbl.style.width = "100%";
-    // tbl.className = "sortable table table-striped table-condensed caption-top"; // bootstrap --> class="table table-striped"
-    // // tbl.className = "sortable";  // sorttable.js is the hook
-    // tbl.setAttribute("border", "0");
-
-    // <caption>Results for 2 heroes, paired up for 2 bouts each</caption><thead><tr><th class="">Hero</th><th id="wins" class=" sorttable_sorted_reverse" style="text-align: right;">Wins<span id="sorttable_sortrevind">&nbsp;▴</span></th><th class="" style="text-align: right;">% total</th></tr></thead><tbody><tr class="success"><td>006:ST8;DX16;DAGGER;LEATHER;LARGE_SHIELD</td><td style="text-align: right;">2</td><td style="text-align: right;">100</td></tr><tr class="danger"><td>005:ST8;DX16;DAGGER;NO_ARMOR;LARGE_SHIELD</td><td style="text-align: right;">0</td><td style="text-align: right;">0</td></tr></tbody><tfoot></tfoot></table>
-
-    // /**
-    //  * add caption
-    //  */
-    // let tbcaption = document.createElement('caption');
-    // tbcaption.appendChild(document.createTextNode(caption));
-    // tbl.appendChild(tbcaption);
-    // let tbhead = document.createElement('thead');
-    // let tr = document.createElement('tr');
-    // let td = document.createElement('th');
     let html = `<caption>${caption}</caption><thead>`;
-    // if (isVersus) {
-    //     td.appendChild(document.createTextNode("Hero 1"));
-    //     tr.appendChild(td);
-    //     td = document.createElement('th');
-    //     td.appendChild(document.createTextNode("vs Hero 2"));
-    //     tr.appendChild(td);
-    // } else {
-    //     td = document.createElement('th');
-    //     td.appendChild(document.createTextNode("Hero"));
-    //     tr.appendChild(td);
-    // }
     if (isVersus) {
         html += `<tr><th>Hero 1</th><th>vs Hero 2</th>`
     } else {
         html += `<tr><th>Hero</th>`
     }
-    // td = document.createElement('th');
-    // td.id = (isVersus ? "match" : "") + "wins";
-    // td.appendChild(document.createTextNode("Wins"));
-    // // td.setAttribute("align", "right");
-    // td.style.textAlign = "right";
-    // tr.appendChild(td);
-    // td = document.createElement('th');
-    // td.style.textAlign = "right";
-    // td.appendChild(document.createTextNode("% total"));
-    // tr.appendChild(td);
-    // tbhead.appendChild(tr);
-    // tbl.appendChild(tbhead);
     html += `<th id="${isVersus ? 'match' : ''}wins" style="text-align: right;">Wins</th><th class="" style="text-align: right;">% total</th></tr></thead>`;
-    // let tbdy = document.createElement('tbody');
-    // let percentageWin = 0;
-    // for (let property in heroWins) {
-    //     if (heroWins.hasOwnProperty(property)) {
     let tbody = '';
     let percentageWin = 0;
     let pctClass: string;
@@ -200,41 +156,10 @@ function createTableFromProperties(heroWins: { [index: string]: number }, totalC
             } else {
                 tbody += `<td>${property}</td>`
             }
-            //         tr = document.createElement('tr');
-            //         td = document.createElement('td');
-            //         if (isVersus) {
-            //             let heroes = property.split("/");
-            //             td.appendChild(document.createTextNode(heroes[0]));
-            //             tr.appendChild(td);
-            //             td = document.createElement('td');
-            //             td.appendChild(document.createTextNode(heroes[1]));
-            //             tr.appendChild(td);
-            //         } else {
-            //             td.appendChild(document.createTextNode(property));
-            //             tr.appendChild(td);
-            //         }
-            //         // add the column for the number of wins
-            //         td = document.createElement('td');
-            //         td.style.textAlign = "right";
-            //         td.appendChild(document.createTextNode(heroWins[property] + ""));
-            //         tr.appendChild(td);
             tbody += `<td style="text-align: right;">${heroWins[property]}</td>`
-            //         td = document.createElement('td');
-            //         td.style.textAlign = "right";
-            //         percentageWin = parseInt(((heroWins[property] / totalCount) * 100).toFixed(2));
-            //         td.appendChild(document.createTextNode("" + percentageWin));
             tbody += `<td style="text-align: right;">${percentageWin}</td></tr>`
-            //         if (percentageWin > 70) { tr.className = "success"; }
-            //         else if (percentageWin < 30) { tr.className = "danger"; }
-            //         tr.appendChild(td);
-            //         tbdy.appendChild(tr);
-            //     }
         }
     }
-    // }
     html += `<tbody>${tbody}</tbody>`;
-    // tbl.appendChild(tbdy);
-    // return tbl.innerHTML;
-    // console.log(`Worker generated this HTML:\n${html}`);
     return html;
 }

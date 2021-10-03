@@ -4,7 +4,8 @@ import { Armor } from "./armor";
 import { log } from "../logger";
 
 export class Hero {
-
+    private static currentId = 0;
+    private _id: number;
     private _name: string;
     private _st: number;
     private _dx: number;
@@ -25,6 +26,7 @@ export class Hero {
     private _charging: boolean;
 
     constructor(name: string, st: number, dx: number, weapon: Weapon, armor: Armor, shield: Shield) {
+        this._id = Hero.currentId++;
         this._name = name;
         this._st = st;
         this._dx = dx;
@@ -44,6 +46,10 @@ export class Hero {
         this._recovering = false;
         this._defending = false;
         this._charging = false;
+    }
+
+    public get id(): number {
+        return this._id;
     }
 
     public get name(): string {
@@ -234,7 +240,7 @@ export class Hero {
     };
 
     public toString() {
-        return `${this._name}\n${this._armor.toString()}\n${this._readiedWeapon.toString()}`;
+        return `${this._name}:ST${this._st};DX${this._dx};${this._weapon.name};${this._armor.name};${this._shield.name}`;
     };
 
     public get canDoDamage(): boolean {
