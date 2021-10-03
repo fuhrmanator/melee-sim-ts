@@ -88,6 +88,8 @@ export function start(this: GlobalEventHandlers, _ev: MouseEvent) {
                         progressBar.style.width = "100%";
                         progressBar.innerText = "See results below.";
                         progressBar.classList.remove("progress-bar-animated"); // stop animated striped bar
+                        progressBar.classList.remove("bg-info"); // success
+                        progressBar.classList.add("bg-success"); //
                     }
 
                     //console.log(`Finished: received ${data.heroWins}`);
@@ -145,6 +147,10 @@ export function start(this: GlobalEventHandlers, _ev: MouseEvent) {
         const boutCount: number = parseInt((document.getElementById("boutsPerMatchup") as HTMLInputElement).value);
         const selectElement = document.getElementById("heroesSelected") as HTMLDataListElement;
         const selectedHeroes = getSelectedValues(selectElement);
+        progressBar.classList.remove("bg-success"); // info
+        progressBar.classList.remove("bg-warning");
+        progressBar.classList.add("bg-info");
+
         // give worker the info
         primeWorker.postMessage({ 'cmd': 'do simulation', 'selectedHeroes': selectedHeroes, 'boutCount': boutCount, 'isPoleWeaponsChargeFirstRound': isPoleWeaponsChargeFirstRoundChecked, 'isDefendVsPoleCharge': isDefendVsPoleChargeChecked, 'isVerbose': isVerboseChecked });
         let p = document.createElement('p');
@@ -172,7 +178,12 @@ export function stop(this: GlobalEventHandlers, _ev: MouseEvent) {
     primeWorker = new PrimeWorker();
 
     let progressBar = document.getElementById("progress");
-    if (progressBar) progressBar.classList.remove("progress-bar-animated"); // stop animated striped bar
+    if (progressBar) {
+        progressBar.classList.remove("progress-bar-animated"); // stop animated striped bar
+        progressBar.classList.remove("bg-info"); // show a warning
+        progressBar.classList.add("bg-warning");
+        progressBar.innerText = "Canceled at " + progressBar.innerText;
+    }
 
     let mw = document.getElementById("matchupWins");
     let hw = document.getElementById("heroWins");
