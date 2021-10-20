@@ -56,7 +56,7 @@ export class Hero {
         return this._name;
     }
 
-    public get getST(): number {
+    public get st(): number {
         return this._st;
     };
 
@@ -64,7 +64,7 @@ export class Hero {
         return Math.max(this._st - this._damageTaken, 0);
     };
 
-    public get getMA(): number {
+    public get ma(): number {
         return this._ma;
     };
 
@@ -72,7 +72,7 @@ export class Hero {
         return this._ma - this._armor.maAdj;
     };
 
-    public get getDX(): number {
+    public get dx(): number {
         return this._dx;
     };
 
@@ -197,11 +197,15 @@ export class Hero {
         return this._pickingUpWeapon;
     };
 
-    public getWeapon() {
+    public get weapon() {
         return this._weapon;
     };
 
-    public get getReadiedWeapon() {
+    public set weapon(weapon: Weapon) {
+        this._weapon = weapon;
+    };
+
+    public get readiedWeapon() {
         return this._readiedWeapon;
     };
 
@@ -223,12 +227,12 @@ export class Hero {
         this._pickingUpWeapon = true;
     };
 
-    public get getArmor() {
+    public get armor() {
         return this._armor;
     };
 
-    public setArmor(armor: Armor) {
-        return this._armor = armor;
+    public set armor(armor: Armor) {
+        this._armor = armor;
     };
 
     public get armorPoints(): number {

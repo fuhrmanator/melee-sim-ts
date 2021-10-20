@@ -2,10 +2,19 @@
 import { Armor } from "./armor";
 import { Shield } from "./shield";
 
+export interface HeroDescription {
+    id: string;
+    st: number;
+    dx: number;
+    weapon: Weapon;
+    armor: Armor;
+    shield: Shield;
+}
+
 export class HeroesSingleton {
     // http://stackoverflow.com/a/9753841/1168342
     private static listHeight = 15;
-    private static heroesListJSON =
+    private static heroesListJSON: Array<HeroDescription> =
         [
             { "id": "001", "st": 8, "dx": 16, "weapon": Weapon.DAGGER, "armor": Armor.NO_ARMOR, "shield": Shield.SMALL_SHIELD },
             { "id": "002", "st": 8, "dx": 16, "weapon": Weapon.DAGGER, "armor": Armor.LEATHER, "shield": Shield.SMALL_SHIELD },
@@ -126,5 +135,8 @@ export class HeroesSingleton {
         const hero = this.heroesListJSON.find(hero => hero.id == id);
         const name = hero ? `${hero.id}:ST${hero.st};DX${hero.dx};${hero.weapon.name};${hero.armor.name};${hero.shield.name}`.toUpperCase().replace(/[ -]/g, '_') : `(hero id ${id} not found)`;
         return name;
+    }
+    static getMyrmidon(): HeroDescription {
+        return { "id": "069", "st": 12, "dx": 12, "weapon": Weapon.BROADSWORD, "armor": Armor.NO_ARMOR, "shield": Shield.SMALL_SHIELD };
     }
 }

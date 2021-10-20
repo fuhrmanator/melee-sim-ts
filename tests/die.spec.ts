@@ -1,8 +1,5 @@
 import { roll, rollDice, rollFourDice, rollThreeDice } from "../src/melee/die";
 import "jest-extended";
-import { setMute } from "../src/logger";
-
-setMute(true); // turn off logging
 
 describe('Die', () => {
     it("should roll between 1 and 6", () => {
@@ -38,7 +35,7 @@ describe('Die', () => {
     });
     it("should rollFourDice() between 4 and 24", () => {
         const rolls = new Set<number>();
-        for (let index = 0; index < 3000; index++) {
+        for (let index = 0; index < 5000; index++) {
             const r = rollFourDice();
             expect(r).toBeWithin(4, 25);
             rolls.add(r);

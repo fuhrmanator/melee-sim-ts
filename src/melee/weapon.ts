@@ -1,5 +1,5 @@
-﻿import { rollDice } from "./die";
-import { log } from "../logger";
+﻿import { log } from "../logger";
+import { Roll } from "../melee/roll";
 
 export class Weapon {
     name: string;
@@ -33,9 +33,7 @@ export class Weapon {
             + ((this.modifier > 0) ? "+" : "")
             + ((this.modifier !== 0) ? this.modifier : "")
             + " damage.");
-        let damage = 0;
-        damage += rollDice(this.dice);
-        damage += this.modifier;
+        let damage = new Roll(this.dice, this.modifier).total;
         if (this.modifier !== 0) log(((this.modifier > 0) ? "+" : "") + this.modifier);
         if (damage < 0) damage = 0;
         log(`Total weapon damage: ${damage}`);

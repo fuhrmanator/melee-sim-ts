@@ -13,7 +13,7 @@ describe('Hero', () => {
     })
     it("should have DX of 10", () => {
         let h = new Hero("joe", 12, 10, Weapon.NONE, Armor.NO_ARMOR, Shield.NO_SHIELD);
-        expect(h.getDX).toBe(10);
+        expect(h.dx).toBe(10);
     })
     it("should have adjusted DX of 10", () => {
         let h = new Hero("joe", 12, 10, Weapon.NONE, Armor.NO_ARMOR, Shield.NO_SHIELD);

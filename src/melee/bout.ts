@@ -3,6 +3,7 @@ import { Weapon } from "./weapon";
 import { log } from "../logger";
 import { rollDice } from "./die";
 import { HeroesSingleton } from "./heroesSingleton"
+import { Roll } from "./roll";
 
 export class Bout {
 
@@ -46,8 +47,8 @@ export class Bout {
 
 
             log("---> Round " + this.round);
-            log("Hero 1: " + this.hero1.name + ", ST: " + this.hero1.getST + "(" + this.hero1.adjST + ")");
-            log("Hero 2: " + this.hero2.name + ", ST: " + this.hero2.getST + "(" + this.hero2.adjST + ")");
+            log("Hero 1: " + this.hero1.name + ", ST: " + this.hero1.st + "(" + this.hero1.adjST + ")");
+            log("Hero 2: " + this.hero2.name + ", ST: " + this.hero2.st + "(" + this.hero2.adjST + ")");
 
             let firstAttacker = this.hero1, secondAttacker = this.hero2;
 
@@ -68,8 +69,8 @@ export class Bout {
 
             log(`${firstAttacker.name} (adjDx = ${firstAttacker.adjustedDx}) attacks before ${secondAttacker.name} (adjDx = ${secondAttacker.adjustedDx})`);
 
-            this.hero1.setCharging((this.poleCharge) && (this.round == 1) && this.hero1.getReadiedWeapon.isPole);
-            this.hero2.setCharging((this.poleCharge) && (this.round == 1) && this.hero2.getReadiedWeapon.isPole);
+            this.hero1.setCharging((this.poleCharge) && (this.round == 1) && this.hero1.readiedWeapon.isPole);
+            this.hero2.setCharging((this.poleCharge) && (this.round == 1) && this.hero2.readiedWeapon.isPole);
 
             this.tryDefending(this.hero1, this.hero2, this.defendOnPoleCharge);
             this.tryDefending(this.hero2, this.hero1, this.defendOnPoleCharge);
@@ -104,7 +105,7 @@ export class Bout {
      */
     private tryDefending(defender: Hero, attacker: Hero, defendOnPoleCharge: boolean) {
         if (!defender.isKnockedDown
-            && defender.getReadiedWeapon !== Weapon.NONE
+            && defender.readiedWeapon !== Weapon.NONE
             && defender.sufferingDexPenalty()
             && defender.adjustedDx < 8) {
 
@@ -113,9 +114,9 @@ export class Bout {
         }
         else if (defendOnPoleCharge
             && !defender.isKnockedDown
-            && defender.getReadiedWeapon !== Weapon.NONE
-            && attacker.getReadiedWeapon !== Weapon.NONE
-            && attacker.getReadiedWeapon.isPole
+            && defender.readiedWeapon !== Weapon.NONE
+            && attacker.readiedWeapon !== Weapon.NONE
+            && attacker.readiedWeapon.isPole
             && attacker.isCharging
             && !defender.isCharging  // don't defend if also charging with pole weapon
         ) {
@@ -133,17 +134,21 @@ export class Bout {
         }
     }
 
-    private tryPickUp(hero: Hero) {
+    public tryPickUp(hero: Hero) {
         if (hero.getDroppedWeapon() !== Weapon.NONE) {
             hero.pickUpWeapon();
             log(`${hero.name} is picking up his weapon this turn (rear facing in all six directions).`);
         }
     }
 
-    private resolveAttack(game: Bout, attacker: Hero, attackee: Hero, roll: number, numDice: number) {
-        const facingBonus = attackee.isProne ? 4 : 0;
+    public facingBonusToAttack(attackee: Hero) {
+        return attackee.isProne ? 4 : 0;
+    }
 
-        log(attacker.name + " rolled " + roll + " and adjDex is "
+    private resolveAttack(game: Bout, attacker: Hero, attackee: Hero, roll: Roll) {
+        const facingBonus = this.facingBonusToAttack(attackee);
+
+        log(attacker.name + " rolled " + roll.total + " and adjDex is "
             + (attackee.isProne ? (attacker.adjustedDx + facingBonus + " (" + attacker.adjustedDx + " + " + facingBonus + ", target is prone, i.e., knocked down or picking up a weapon)")
                 : attacker.adjustedDx));
 
@@ -152,26 +157,26 @@ export class Bout {
          * NOT an automatic miss AND
          * (below or equal to the attacker's adjDex OR and automatic hit)
          */
-        if (!this.isAutomaticMiss(roll, numDice) && (roll <= attacker.adjustedDx + facingBonus || this.isAutomaticHit(roll, numDice))) {
+        if (!this.isAutomaticMiss(roll) && (roll.total <= attacker.adjustedDx + facingBonus || this.isAutomaticHit(roll))) {
             log("HIT!!!!");
 
-            let hits = attacker.getReadiedWeapon.doDamage();
-            if (attacker.isCharging && attacker.getReadiedWeapon.isPole) {
+            let hits = attacker.readiedWeapon.doDamage();
+            if (attacker.isCharging && attacker.readiedWeapon.isPole) {
                 log("Pole weapon charge does double damage!");
                 game.criticalHits++;
                 hits *= 2;
             }
-            if (this.isDoubleDamage(roll, numDice)) {
-                log("Double damage! (roll of " + roll + " on " + numDice + " dice.)");
+            if (this.isDoubleDamage(roll)) {
+                log("Double damage! (roll of " + roll.total + " on " + roll.numberOfDice + " dice.)");
                 game.criticalHits++;
                 hits *= 2;
             }
-            else if (this.isTripleDamage(roll, numDice)) {
-                log("Triple damage! (roll of " + roll + " on " + numDice + " dice.)");
+            else if (this.isTripleDamage(roll)) {
+                log("Triple damage! (roll of " + roll.total + " on " + roll.numberOfDice + " dice.)");
                 game.criticalHits++;
                 hits *= 3;
             }
-            log("Total damage done by " + attacker.getReadiedWeapon.name + ": " + hits + " hits");
+            log("Total damage done by " + attacker.readiedWeapon.name + ": " + hits + " hits");
             attackee.takeHits(hits);
 
         } else {
@@ -179,12 +184,12 @@ export class Bout {
              * It's a miss
              */
             log("Missed. ");
-            if (this.isDroppedWeapon(roll, numDice)) {
+            if (this.isDroppedWeapon(roll)) {
                 log("Dropped weapon! ");
                 game.criticalMisses++;
                 attacker.dropWeapon();
             }
-            else if (this.isBrokenWeapon(roll, numDice)) {
+            else if (this.isBrokenWeapon(roll)) {
                 log("Broke weapon! ");
                 game.criticalMisses++;
                 attacker.breakWeapon();
@@ -199,12 +204,12 @@ export class Bout {
         if (!attacker.isDefending()) {
             if (attacker.isConscious) {
                 if (!attacker.isKnockedDown) {
-                    if (attacker.getReadiedWeapon !== Weapon.NONE) {
+                    if (attacker.readiedWeapon !== Weapon.NONE) {
                         if (attacker.isCharging) log("He's charging with pole weapon (double damage if he hits).");
                         const numDice = attackee.isDefending() ? 4 : 3;
                         log("Rolling to hit on " + numDice + " dice.");
                         this.resolveAttack(game, attacker, attackee,
-                            rollDice(numDice), numDice);
+                            new Roll(numDice));
                     } else {
 
                         log("But he's not able to attack because he has has no readied weapon.");
@@ -224,46 +229,46 @@ export class Bout {
 
     };
 
-    private isAutomaticMiss(roll: number, numDice: number) {
+    isAutomaticMiss(roll: Roll) {
         let result = false;
-        switch (numDice) {
+        switch (roll.numberOfDice) {
             case 3:
-                result = (roll >= 16);
+                result = (roll.total >= 16);
                 break;
 
             case 4:
-                result = (roll >= 20);
+                result = (roll.total >= 20);
                 break;
 
             default:
-                throw new RangeError("unsupported value for roll: " + roll);
+                throw new RangeError("unsupported number of dice: " + roll.numberOfDice);
         }
         return result;
     }
 
-    private isAutomaticHit(roll: number, numDice: number) {
+    isAutomaticHit(roll: Roll) {
         let result = false;
-        switch (numDice) {
+        switch (roll.numberOfDice) {
             case 3:
-                result = (roll <= 5);
+                result = (roll.total <= 5);
                 break;
 
             case 4:
-                // 4 dice is assumed to be defending - no autmatic hits according to Melee rules
+                // 4 dice is assumed to be defending - no automatic hits according to Melee rules
                 result = false;
                 break;
 
             default:
-                throw new RangeError("unsupported value for roll: " + roll);
+                throw new RangeError("unsupported number of dice: " + roll.numberOfDice);
         }
         return result;
     }
 
-    private isDoubleDamage(roll: number, numDice: number) {
+    isDoubleDamage(roll: Roll) {
         let result = false;
-        switch (numDice) {
+        switch (roll.numberOfDice) {
             case 3:
-                result = (roll == 4);
+                result = (roll.total == 4);
                 break;
 
             case 4:
@@ -272,16 +277,16 @@ export class Bout {
                 break;
 
             default:
-                throw new RangeError("unsupported value for roll: " + roll);
+                throw new RangeError("unsupported number of dice: " + roll.numberOfDice);
         }
         return result;
     }
 
-    private isTripleDamage(roll: number, numDice: number) {
+    isTripleDamage(roll: Roll) {
         let result = false;
-        switch (numDice) {
+        switch (roll.numberOfDice) {
             case 3:
-                result = (roll == 3);
+                result = (roll.total == 3);
                 break;
 
             case 4:
@@ -290,41 +295,41 @@ export class Bout {
                 break;
 
             default:
-                throw new RangeError("unsupported value for roll: " + roll);
+                throw new RangeError("unsupported number of dice: " + roll.numberOfDice);
         }
         return result;
     }
 
-    private isDroppedWeapon(roll: number, numDice: number) {
+    isDroppedWeapon(roll: Roll) {
         let result = false;
-        switch (numDice) {
+        switch (roll.numberOfDice) {
             case 3:
-                result = (roll == 17);
+                result = (roll.total == 17);
                 break;
 
             case 4:
-                result = ((roll == 21) || (roll == 22));
+                result = ((roll.total == 21) || (roll.total == 22));
                 break;
 
             default:
-                throw new RangeError("unsupported value for roll: " + roll);
+                throw new RangeError("unsupported number of dice: " + roll.numberOfDice);
         }
         return result;
     }
 
-    private isBrokenWeapon(roll: number, numDice: number) {
+    isBrokenWeapon(roll: Roll) {
         let result = false;
-        switch (numDice) {
+        switch (roll.numberOfDice) {
             case 3:
-                result = (roll == 18);
+                result = (roll.total == 18);
                 break;
 
             case 4:
-                result = ((roll == 23) || (roll == 24));
+                result = ((roll.total == 23) || (roll.total == 24));
                 break;
 
             default:
-                throw new RangeError("unsupported value for roll: " + roll);
+                throw new RangeError("unsupported number of dice: " + roll.numberOfDice);
         }
         return result;
     };
