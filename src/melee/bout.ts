@@ -4,7 +4,7 @@ import { log } from "../logger";
 import { rollDice } from "./die";
 import { HeroesSingleton } from "./heroesSingleton"
 
-export class Game {
+export class Bout {
 
     static heroMap = new Map<string, Hero>(); // singleton
     hero1: Hero;
@@ -31,7 +31,7 @@ export class Game {
     };
 
     fightToTheDeath() {
-        var winner = null;
+        let winner = null;
         /**
          * As long as both are still conscious and at least one can do damage
          * Note: even though one hero breaks a weapon, the other could also
@@ -49,7 +49,7 @@ export class Game {
             log("Hero 1: " + this.hero1.name + ", ST: " + this.hero1.getST + "(" + this.hero1.adjST + ")");
             log("Hero 2: " + this.hero2.name + ", ST: " + this.hero2.getST + "(" + this.hero2.adjST + ")");
 
-            var firstAttacker = this.hero1, secondAttacker = this.hero2;
+            let firstAttacker = this.hero1, secondAttacker = this.hero2;
 
             /* highest adjDx attacks first */
             if (this.hero1.adjustedDx < this.hero2.adjustedDx) {
@@ -140,8 +140,8 @@ export class Game {
         }
     }
 
-    private resolveAttack(game: Game, attacker: Hero, attackee: Hero, roll: number, numDice: number) {
-        var facingBonus = attackee.isProne ? 4 : 0;
+    private resolveAttack(game: Bout, attacker: Hero, attackee: Hero, roll: number, numDice: number) {
+        const facingBonus = attackee.isProne ? 4 : 0;
 
         log(attacker.name + " rolled " + roll + " and adjDex is "
             + (attackee.isProne ? (attacker.adjustedDx + facingBonus + " (" + attacker.adjustedDx + " + " + facingBonus + ", target is prone, i.e., knocked down or picking up a weapon)")
@@ -155,7 +155,7 @@ export class Game {
         if (!this.isAutomaticMiss(roll, numDice) && (roll <= attacker.adjustedDx + facingBonus || this.isAutomaticHit(roll, numDice))) {
             log("HIT!!!!");
 
-            var hits = attacker.getReadiedWeapon.doDamage();
+            let hits = attacker.getReadiedWeapon.doDamage();
             if (attacker.isCharging && attacker.getReadiedWeapon.isPole) {
                 log("Pole weapon charge does double damage!");
                 game.criticalHits++;
@@ -194,14 +194,14 @@ export class Game {
 
     };
 
-    private tryAttack(game: Game, attacker: Hero, attackee: Hero) {
+    private tryAttack(game: Bout, attacker: Hero, attackee: Hero) {
         log(attacker.name + " gets his turn to attack.");
         if (!attacker.isDefending()) {
             if (attacker.isConscious) {
                 if (!attacker.isKnockedDown) {
                     if (attacker.getReadiedWeapon !== Weapon.NONE) {
                         if (attacker.isCharging) log("He's charging with pole weapon (double damage if he hits).");
-                        var numDice = attackee.isDefending() ? 4 : 3;
+                        const numDice = attackee.isDefending() ? 4 : 3;
                         log("Rolling to hit on " + numDice + " dice.");
                         this.resolveAttack(game, attacker, attackee,
                             rollDice(numDice), numDice);
@@ -225,7 +225,7 @@ export class Game {
     };
 
     private isAutomaticMiss(roll: number, numDice: number) {
-        var result = false;
+        let result = false;
         switch (numDice) {
             case 3:
                 result = (roll >= 16);
@@ -242,7 +242,7 @@ export class Game {
     }
 
     private isAutomaticHit(roll: number, numDice: number) {
-        var result = false;
+        let result = false;
         switch (numDice) {
             case 3:
                 result = (roll <= 5);
@@ -260,7 +260,7 @@ export class Game {
     }
 
     private isDoubleDamage(roll: number, numDice: number) {
-        var result = false;
+        let result = false;
         switch (numDice) {
             case 3:
                 result = (roll == 4);
@@ -278,7 +278,7 @@ export class Game {
     }
 
     private isTripleDamage(roll: number, numDice: number) {
-        var result = false;
+        let result = false;
         switch (numDice) {
             case 3:
                 result = (roll == 3);
@@ -296,7 +296,7 @@ export class Game {
     }
 
     private isDroppedWeapon(roll: number, numDice: number) {
-        var result = false;
+        let result = false;
         switch (numDice) {
             case 3:
                 result = (roll == 17);
@@ -313,7 +313,7 @@ export class Game {
     }
 
     private isBrokenWeapon(roll: number, numDice: number) {
-        var result = false;
+        let result = false;
         switch (numDice) {
             case 3:
                 result = (roll == 18);
@@ -331,10 +331,10 @@ export class Game {
 
     static createHeroesMap() {
         // heroSet.put(new Hero("001:ST8;DX16;DAGGER;NO_ARMOR;SMALL_SHIELD", 8, 16, Weapon.DAGGER, Armor.NO_ARMOR, Shield.SMALL_SHIELD), new Integer(0));
-        var h1;
-        var heroesListJSON = HeroesSingleton.getHeroesListJSON();
-        var heroJSON = null;
-        for (var i = 0; i < heroesListJSON.length; i++) {
+        let h1;
+        const heroesListJSON = HeroesSingleton.getHeroesListJSON();
+        let heroJSON = null;
+        for (let i = 0; i < heroesListJSON.length; i++) {
             heroJSON = heroesListJSON[i];
             h1 = new Hero(HeroesSingleton.getNameFromID(heroJSON.id), heroJSON.st, heroJSON.dx, heroJSON.weapon, heroJSON.armor, heroJSON.shield);
             //this.putHero(h1);
@@ -343,11 +343,11 @@ export class Game {
     };
 
     private displayHeroesMap() {
-        console.log(Object.keys(Game.heroMap));
+        console.log(Object.keys(Bout.heroMap));
     };
 
     static getHeroMap() {
-        return Game.heroMap;
+        return Bout.heroMap;
     };
 
 }

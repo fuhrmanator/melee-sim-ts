@@ -1,4 +1,4 @@
-﻿import { Game } from "../melee/game";
+﻿import { Bout } from "../melee/bout";
 import { Hero } from "../melee/hero";
 import { log, setMute } from "../logger";
 import { HeroesSingleton } from "../melee/heroesSingleton";
@@ -22,8 +22,8 @@ ctx.addEventListener('message', function (event: any) {
         default:
             const heroSet = new Array<Hero>();  // list of heroes to fight
 
-            Game.createHeroesMap();
-            let completeHeroMap = Game.getHeroMap();
+            Bout.createHeroesMap();
+            let completeHeroMap = Bout.getHeroMap();
             data.selectedHeroes.forEach(function (heroID: string) {
                 let hero = completeHeroMap.get(HeroesSingleton.getNameFromID(heroID));
                 if (hero) heroSet.push(hero); else console.log(`  !!! Didn't find ${HeroesSingleton.getNameFromID(heroID)} (${heroID}) in map !!!`);
@@ -89,7 +89,7 @@ function tryAllCombinations(heroSet: Array<Hero>, boutCount: number) {
                 // clone heroes (resets them) prior to fighting
                 let fightingHero1 = Object.create(hero1);
                 let fightingHero2 = Object.create(hero2);
-                game = new Game(fightingHero1, fightingHero2, poleWeaponsChargeFirstRound, defendVsPoleCharge);
+                game = new Bout(fightingHero1, fightingHero2, poleWeaponsChargeFirstRound, defendVsPoleCharge);
                 let winningFighter = game.fightToTheDeath();
 
                 if (winningFighter !== null) {
