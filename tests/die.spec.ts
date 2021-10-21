@@ -1,5 +1,4 @@
 import { roll, rollDice, rollFourDice, rollThreeDice } from "../src/melee/die";
-import "jest-extended";
 
 describe('Die', () => {
     it("should roll between 1 and 6", () => {
@@ -30,7 +29,7 @@ describe('Die', () => {
         }
         //expect(rolls.size).toBe(16); // 3,4,...,18
         for (let index = 3; index < 19; index++) {
-            expect(rolls.has(index)).toBeTrue();
+            expect(rolls.has(index)).toBe(true);
         }
     });
     it("should rollFourDice() between 4 and 24", () => {
@@ -42,7 +41,7 @@ describe('Die', () => {
         }
         //expect(rolls.size).toBe(22); // 4,5,...,24
         for (let index = 4; index < 25; index++) {
-            expect(rolls.has(index)).toBeTrue();
+            expect(rolls.has(index)).toBe(true);
         }
     });
 })
