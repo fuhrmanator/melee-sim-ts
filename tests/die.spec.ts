@@ -1,4 +1,5 @@
 import { roll, rollDice, rollFourDice, rollThreeDice } from "../src/melee/die";
+import "jest-extended"  // should work with global.d.ts, but it doesn't
 
 describe('Die', () => {
     it("should roll between 1 and 6", () => {
