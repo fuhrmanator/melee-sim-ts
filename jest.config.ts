@@ -11,7 +11,8 @@ const config: Config.InitialOptions = {
   setupFilesAfterEnv: ["jest-extended/all"],
   globals: {
     'ts-jest': {
-      diagnostics: false,
+      diagnostics: true,
+      tsconfig: './tsconfig.json'
     }
   }
 };
